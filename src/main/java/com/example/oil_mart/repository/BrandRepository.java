@@ -1,10 +1,9 @@
 package com.example.oil_mart.repository;
 
-import com.example.oil_mart.model.User;
+import com.example.oil_mart.model.Brand;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AuthRepository extends JpaRepository<User, String> {
-    User findByUsername(String username);
+public interface BrandRepository extends JpaRepository<Brand, Integer> {
 }
