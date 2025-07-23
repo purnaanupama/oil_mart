@@ -7,12 +7,16 @@ import com.example.oil_mart.enums.Status;
 import com.example.oil_mart.model.Brand;
 import com.example.oil_mart.repository.BrandRepository;
 import com.example.oil_mart.service.BrandService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
 public class BrandServiceImplementation implements BrandService {
 
+    @Autowired
     private BrandRepository brandRepository;
 
     @Override

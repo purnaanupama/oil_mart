@@ -2,9 +2,8 @@ package com.example.oil_mart.controller;
 
 import com.example.oil_mart.dto.request.BrandSaveRequest;
 import com.example.oil_mart.dto.response.BrandResponse;
-import com.example.oil_mart.model.Brand;
 import com.example.oil_mart.service.BrandService;
-import io.swagger.models.Response;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +13,7 @@ import java.util.List;
 @RequestMapping("api/brand")
 public class BrandController {
 
+    @Autowired
     private BrandService brandService;
 
     @PostMapping()
