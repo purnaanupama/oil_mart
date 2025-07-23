@@ -57,7 +57,23 @@ public class BrandServiceImplementation implements BrandService {
 
     @Override
     public BrandResponse update(BrandUpdateRequest updateRequest) {
-        return null;
+        try {
+            Brand updateResponse = new Brand();
+
+            Brand brand = brandRepository.getById(updateRequest.getId());
+
+            if (brand != null) {
+                brand.setBrandName(updateRequest.getBrandName());
+                brand.setStatus(updateRequest.getStatus());
+                brand.setModifiedBy(updateRequest.getModifiedBy());
+
+                updateResponse = brandRepository.save(brand);
+            }
+
+            return returnResponse(updateResponse);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static BrandResponse returnResponse(Brand brand) {
