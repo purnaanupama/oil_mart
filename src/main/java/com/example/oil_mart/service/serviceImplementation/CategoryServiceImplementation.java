@@ -76,16 +76,16 @@ public class CategoryServiceImplementation implements CategoryService {
         }
     }
 
-    private static CategoryResponse returnResponse(Category brand) {
+    private static CategoryResponse returnResponse(Category category) {
         CategoryResponse response = new CategoryResponse();
 
-        response.setId(brand.getId());
-        response.setCategoryName(brand.getCategoryName());
-        response.setCreatedBy(brand.getCreatedBy());
-        response.setCreatedDateTime(brand.getCreatedDateTime());
-        response.setModifiedBy(brand.getModifiedBy());
-        response.setModifiedDateTime(brand.getModifiedDateTime());
-        response.setStatus(brand.getStatus());
+        response.setId(category.getId());
+        response.setCategoryName(category.getCategoryName());
+        response.setCreatedBy(category.getCreatedBy());
+        response.setCreatedDateTime(category.getCreatedDateTime());
+        response.setModifiedBy(category.getModifiedBy());
+        response.setModifiedDateTime(category.getModifiedDateTime());
+        response.setStatus(category.getStatus());
 
         return response;
     }

@@ -32,6 +32,6 @@ public class Item extends BaseEntity {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "CATEGORY_ID", referencedColumnName = "ID")
-    private Brand itemCategory;
+    private Category itemCategory;
 
 }

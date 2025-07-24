@@ -1,9 +1,11 @@
 package com.example.oil_mart.dto.response;
 
 import com.example.oil_mart.enums.Status;
+import lombok.Data;
 
 import java.util.Date;
 
+@Data
 public class ItemResponse {
 
     private Integer id;
@@ -20,9 +22,9 @@ public class ItemResponse {
 
     private double retailPrice;
 
-    private Integer itemBrand;
+    private BrandResponse itemBrand;
 
-    private Integer itemCategory;
+    private CategoryResponse itemCategory;
 
     private Status status;
 
