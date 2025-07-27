@@ -38,12 +38,11 @@ public class ItemServiceImplementation implements ItemService {
 
             item.setItemCode(saveRequest.getItemCode());
             item.setItemDescription(saveRequest.getItemDescription());
-            item.setPackSize(saveRequest.getPackSize());
-            item.setPackUnit(saveRequest.getPackUnit());
+//            item.setPackSize(saveRequest.getPackSize());
+//            item.setPackUnit(saveRequest.getPackUnit());
             item.setWholesalePrice(saveRequest.getWholesalePrice());
             item.setRetailPrice(saveRequest.getRetailPrice());
             item.setItemBrand(brandRepository.getReferenceById(saveRequest.getItemBrand()));
-            item.setItemCategory(categoryRepository.getReferenceById(saveRequest.getItemCategory()));
             item.setCreatedBy(saveRequest.getCreatedBy());
             item.setModifiedBy(saveRequest.getCreatedBy());
             item.setStatus(Status.ACTIVE);
@@ -84,12 +83,11 @@ public class ItemServiceImplementation implements ItemService {
             if (item != null) {
                 item.setItemCode(updateRequest.getItemCode());
                 item.setItemDescription(updateRequest.getItemDescription());
-                item.setPackSize(updateRequest.getPackSize());
-                item.setPackUnit(updateRequest.getPackUnit());
+//                item.setPackSize(updateRequest.getPackSize());
+//                item.setPackUnit(updateRequest.getPackUnit());
                 item.setWholesalePrice(updateRequest.getWholesalePrice());
                 item.setRetailPrice(updateRequest.getRetailPrice());
                 item.setItemBrand(brandRepository.getReferenceById(updateRequest.getItemBrand()));
-                item.setItemCategory(categoryRepository.getReferenceById(updateRequest.getItemCategory()));
                 item.setStatus(updateRequest.getStatus());
                 item.setModifiedBy(updateRequest.getModifiedBy());
 
@@ -102,18 +100,33 @@ public class ItemServiceImplementation implements ItemService {
         }
     }
 
+    @Override
+    public ItemResponse deleteById(Integer id) {
+        try {
+            Item item = itemRepository.findById(id).orElse(null);
+
+            if (item == null) {
+                throw new RuntimeException("Item not found with ID: " + id);
+            }
+
+            itemRepository.delete(item);
+            return returnResponse(item);
+        } catch (Exception e) {
+            throw new RuntimeException("Error deleting item", e);
+        }
+    }
+
     private static ItemResponse returnResponse(Item item) {
         ItemResponse response = new ItemResponse();
 
         response.setId(item.getId());
         response.setItemCode(item.getItemCode());
         response.setItemDescription(item.getItemDescription());
-        response.setPackSize(item.getPackSize());
-        response.setPackUnit(item.getPackUnit());
+//        response.setPackSize(item.getPackSize());
+//        response.setPackUnit(item.getPackUnit());
         response.setWholesalePrice(item.getWholesalePrice());
         response.setRetailPrice(item.getRetailPrice());
         response.setItemBrand(brandConversion(item.getItemBrand()));
-        response.setItemCategory(categoryConversion(item.getItemCategory()));
         response.setStatus(item.getStatus());
         response.setCreatedBy(item.getCreatedBy());
         response.setCreatedDateTime(item.getCreatedDateTime());
@@ -128,11 +141,6 @@ public class ItemServiceImplementation implements ItemService {
 
         brandResponse.setId(brand.getId());
         brandResponse.setBrandName(brand.getBrandName());
-        brandResponse.setCreatedBy(brand.getCreatedBy());
-        brandResponse.setCreatedDateTime(brand.getCreatedDateTime());
-        brandResponse.setModifiedBy(brand.getModifiedBy());
-        brandResponse.setModifiedDateTime(brand.getModifiedDateTime());
-        brandResponse.setStatus(brand.getStatus());
 
         return brandResponse;
     }

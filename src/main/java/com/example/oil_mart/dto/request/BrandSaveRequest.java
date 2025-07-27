@@ -4,9 +4,6 @@ import lombok.Data;
 
 @Data
 public class BrandSaveRequest {
-
     private String brandName;
-
-    private String createdBy;
-
+    private String createdBy; // required for BaseEntity
 }

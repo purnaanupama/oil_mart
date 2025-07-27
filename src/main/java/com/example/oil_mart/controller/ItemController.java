@@ -21,7 +21,6 @@ public class ItemController {
     public ResponseEntity<ItemResponse> saveItem(@RequestBody ItemSaveRequest saveRequest) {
         try {
             ItemResponse saveResponse = itemService.save(saveRequest);
-
             return ResponseEntity.ok(saveResponse);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -60,4 +59,21 @@ public class ItemController {
             throw new RuntimeException(e);
         }
     }
+
+    @DeleteMapping("{itemId}")
+    public ResponseEntity<ItemResponse> deleteItem(@PathVariable("itemId") Integer itemId) {
+        try {
+            ItemResponse deletedItem = itemService.deleteById(itemId);
+
+            if (deletedItem != null) {
+                return ResponseEntity.ok(deletedItem);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

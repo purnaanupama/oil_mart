@@ -23,70 +23,51 @@ public class BrandServiceImplementation implements BrandService {
     public BrandResponse save(BrandSaveRequest saveRequest) {
         try {
             Brand brand = new Brand();
-
             brand.setBrandName(saveRequest.getBrandName());
             brand.setCreatedBy(saveRequest.getCreatedBy());
-            brand.setModifiedBy(saveRequest.getCreatedBy());
             brand.setStatus(Status.ACTIVE);
 
-            Brand saveResponse = brandRepository.save(brand);
-
-            return returnResponse(saveResponse);
+            Brand savedBrand = brandRepository.save(brand);
+            return returnResponse(savedBrand);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error saving brand", e);
         }
     }
 
     @Override
     public List<BrandResponse> getAll() {
-        try {
-            return brandRepository.findAll().stream().map(BrandServiceImplementation::returnResponse).collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return brandRepository.findAll()
+                .stream()
+                .map(BrandServiceImplementation::returnResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
     public BrandResponse getById(Integer id) {
-        try {
-            return brandRepository.findById(id).map(BrandServiceImplementation::returnResponse).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return brandRepository.findById(id)
+                .map(BrandServiceImplementation::returnResponse)
+                .orElse(null);
     }
 
     @Override
     public BrandResponse update(BrandUpdateRequest updateRequest) {
-        try {
-            Brand updateResponse = new Brand();
+        Brand brand = brandRepository.findById(updateRequest.getId())
+                .orElseThrow(() -> new RuntimeException("Brand not found"));
 
-            Brand brand = brandRepository.getById(updateRequest.getId());
+        brand.setBrandName(updateRequest.getBrandName());
+        brand.setModifiedBy(updateRequest.getModifiedBy());
+        brand.setStatus(updateRequest.getStatus());
 
-            if (brand != null) {
-                brand.setBrandName(updateRequest.getBrandName());
-                brand.setStatus(updateRequest.getStatus());
-                brand.setModifiedBy(updateRequest.getModifiedBy());
-
-                updateResponse = brandRepository.save(brand);
-            }
-
-            return returnResponse(updateResponse);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        Brand updated = brandRepository.save(brand);
+        return returnResponse(updated);
     }
 
     private static BrandResponse returnResponse(Brand brand) {
         BrandResponse response = new BrandResponse();
-
         response.setId(brand.getId());
         response.setBrandName(brand.getBrandName());
         response.setCreatedBy(brand.getCreatedBy());
         response.setCreatedDateTime(brand.getCreatedDateTime());
-        response.setModifiedBy(brand.getModifiedBy());
-        response.setModifiedDateTime(brand.getModifiedDateTime());
-        response.setStatus(brand.getStatus());
-
         return response;
     }
 }

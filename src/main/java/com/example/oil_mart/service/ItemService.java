@@ -18,4 +18,6 @@ public interface ItemService {
 
     ItemResponse update(ItemUpdateRequest updateRequest);
 
+    ItemResponse deleteById(Integer Id);
+
 }

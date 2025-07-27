@@ -21,7 +21,6 @@ public class BrandController {
     public ResponseEntity<BrandResponse> saveBrand(@RequestBody BrandSaveRequest saveRequest) {
         try {
             BrandResponse saveResponse = brandService.save(saveRequest);
-
             return ResponseEntity.ok(saveResponse);
         } catch (Exception e) {
             throw new RuntimeException(e);

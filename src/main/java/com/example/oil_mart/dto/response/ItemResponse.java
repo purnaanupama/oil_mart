@@ -24,8 +24,6 @@ public class ItemResponse {
 
     private BrandResponse itemBrand;
 
-    private CategoryResponse itemCategory;
-
     private Status status;
 
     private String createdBy;

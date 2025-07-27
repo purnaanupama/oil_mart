@@ -12,17 +12,11 @@ public class ItemUpdateRequest {
 
     private String itemDescription;
 
-    private String packSize;
-
-    private String packUnit;
-
     private double wholesalePrice;
 
     private double retailPrice;
 
     private Integer itemBrand;
-
-    private Integer itemCategory;
 
     private Status status;
 
