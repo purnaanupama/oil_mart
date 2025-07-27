@@ -5,7 +5,9 @@ import com.example.oil_mart.dto.request.BrandUpdateRequest;
 import com.example.oil_mart.dto.response.BrandResponse;
 import com.example.oil_mart.enums.Status;
 import com.example.oil_mart.model.Brand;
+import com.example.oil_mart.model.Item;
 import com.example.oil_mart.repository.BrandRepository;
+import com.example.oil_mart.repository.ItemRepository;
 import com.example.oil_mart.service.BrandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,8 @@ public class BrandServiceImplementation implements BrandService {
 
     @Autowired
     private BrandRepository brandRepository;
-
+    @Autowired
+    private ItemRepository itemRepository;
     @Override
     public BrandResponse save(BrandSaveRequest saveRequest) {
         try {
@@ -61,6 +64,27 @@ public class BrandServiceImplementation implements BrandService {
         Brand updated = brandRepository.save(brand);
         return returnResponse(updated);
     }
+
+    @Override
+    public BrandResponse deleteById(Integer id) {
+        try {
+            Brand brand = brandRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Brand not found with ID: " + id));
+
+            // Check if any items are using this brand
+            List<Item> itemsUsingBrand = itemRepository.findByItemBrand_Id(id);
+            if (!itemsUsingBrand.isEmpty()) {
+                throw new RuntimeException("Cannot delete brand. It is currently in use by existing items.");
+            }
+
+            brandRepository.delete(brand);
+            return returnResponse(brand);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error deleting brand: " + e.getMessage(), e);
+        }
+    }
+
 
     private static BrandResponse returnResponse(Brand brand) {
         BrandResponse response = new BrandResponse();

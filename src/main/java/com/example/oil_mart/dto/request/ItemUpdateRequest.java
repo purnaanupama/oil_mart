@@ -22,4 +22,8 @@ public class ItemUpdateRequest {
 
     private String modifiedBy;
 
+    private String packSize;
+
+    private String packUnit;
+
 }

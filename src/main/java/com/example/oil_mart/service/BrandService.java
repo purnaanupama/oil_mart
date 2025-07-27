@@ -11,4 +11,6 @@ public interface BrandService {
     List<BrandResponse> getAll();
     BrandResponse getById(Integer id);
     BrandResponse update(BrandUpdateRequest updateRequest);
+
+    BrandResponse deleteById(Integer id);
 }

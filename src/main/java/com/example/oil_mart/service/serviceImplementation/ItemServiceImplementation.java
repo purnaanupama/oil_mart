@@ -82,14 +82,13 @@ public class ItemServiceImplementation implements ItemService {
             if (item != null) {
                 item.setItemCode(updateRequest.getItemCode());
                 item.setItemDescription(updateRequest.getItemDescription());
-//                item.setPackSize(updateRequest.getPackSize());
-//                item.setPackUnit(updateRequest.getPackUnit());
+                item.setPackSize(updateRequest.getPackSize());
+                item.setPackUnit(updateRequest.getPackUnit());
                 item.setWholesalePrice(updateRequest.getWholesalePrice());
                 item.setRetailPrice(updateRequest.getRetailPrice());
                 item.setItemBrand(brandRepository.getReferenceById(updateRequest.getItemBrand()));
                 item.setStatus(updateRequest.getStatus());
                 item.setModifiedBy(updateRequest.getModifiedBy());
-
                 updateResponse = itemRepository.save(item);
             }
 
