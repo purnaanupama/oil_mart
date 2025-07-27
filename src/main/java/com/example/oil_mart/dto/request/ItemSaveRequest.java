@@ -17,4 +17,7 @@ public class ItemSaveRequest {
 
     private String createdBy;
 
+    private String packSize;
+
+    private String packUnit;
 }

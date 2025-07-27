@@ -35,11 +35,10 @@ public class ItemServiceImplementation implements ItemService {
     public ItemResponse save(ItemSaveRequest saveRequest) {
         try {
             Item item = new Item();
-
             item.setItemCode(saveRequest.getItemCode());
             item.setItemDescription(saveRequest.getItemDescription());
-//            item.setPackSize(saveRequest.getPackSize());
-//            item.setPackUnit(saveRequest.getPackUnit());
+            item.setPackSize(saveRequest.getPackSize());
+            item.setPackUnit(saveRequest.getPackUnit());
             item.setWholesalePrice(saveRequest.getWholesalePrice());
             item.setRetailPrice(saveRequest.getRetailPrice());
             item.setItemBrand(brandRepository.getReferenceById(saveRequest.getItemBrand()));
