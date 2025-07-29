@@ -22,6 +22,8 @@ public class ItemResponse {
 
     private double retailPrice;
 
+    private double availableStock;
+
     private BrandResponse itemBrand;
 
     private Status status;

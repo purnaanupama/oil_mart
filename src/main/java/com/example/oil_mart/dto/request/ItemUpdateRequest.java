@@ -16,6 +16,12 @@ public class ItemUpdateRequest {
 
     private double retailPrice;
 
+    private String packSize;
+
+    private String packUnit;
+
+    private double availableStock;
+
     private Integer itemBrand;
 
     private Status status;

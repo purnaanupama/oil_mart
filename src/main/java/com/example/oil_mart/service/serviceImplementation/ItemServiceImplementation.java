@@ -38,8 +38,8 @@ public class ItemServiceImplementation implements ItemService {
 
             item.setItemCode(saveRequest.getItemCode());
             item.setItemDescription(saveRequest.getItemDescription());
-//            item.setPackSize(saveRequest.getPackSize());
-//            item.setPackUnit(saveRequest.getPackUnit());
+            item.setPackSize(saveRequest.getPackSize());
+            item.setPackUnit(saveRequest.getPackUnit());
             item.setWholesalePrice(saveRequest.getWholesalePrice());
             item.setRetailPrice(saveRequest.getRetailPrice());
             item.setItemBrand(brandRepository.getReferenceById(saveRequest.getItemBrand()));
@@ -83,8 +83,8 @@ public class ItemServiceImplementation implements ItemService {
             if (item != null) {
                 item.setItemCode(updateRequest.getItemCode());
                 item.setItemDescription(updateRequest.getItemDescription());
-//                item.setPackSize(updateRequest.getPackSize());
-//                item.setPackUnit(updateRequest.getPackUnit());
+                item.setPackSize(updateRequest.getPackSize());
+                item.setPackUnit(updateRequest.getPackUnit());
                 item.setWholesalePrice(updateRequest.getWholesalePrice());
                 item.setRetailPrice(updateRequest.getRetailPrice());
                 item.setItemBrand(brandRepository.getReferenceById(updateRequest.getItemBrand()));
@@ -122,8 +122,8 @@ public class ItemServiceImplementation implements ItemService {
         response.setId(item.getId());
         response.setItemCode(item.getItemCode());
         response.setItemDescription(item.getItemDescription());
-//        response.setPackSize(item.getPackSize());
-//        response.setPackUnit(item.getPackUnit());
+        response.setPackSize(item.getPackSize());
+        response.setPackUnit(item.getPackUnit());
         response.setWholesalePrice(item.getWholesalePrice());
         response.setRetailPrice(item.getRetailPrice());
         response.setItemBrand(brandConversion(item.getItemBrand()));

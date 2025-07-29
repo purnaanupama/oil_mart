@@ -26,6 +26,9 @@ public class Item extends BaseEntity {
     @Column(name = "RETAIL_PRICE", nullable = false)
     private double retailPrice;
 
+    @Column(name="AVAILABLE_STOCK", nullable = false, columnDefinition = "double default 0.0")
+    private double availableStock;
+
     @ManyToOne
     @JoinColumn(name = "BRAND_ID", referencedColumnName = "ID")
     private Brand itemBrand;
