@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +35,16 @@ public class ItemServiceImplementation implements ItemService {
     @Override
     public ItemResponse save(ItemSaveRequest saveRequest) {
         try {
+            // Check if item already exists
+            Optional<Item> existingItem = itemRepository.findByItemCodeAndItemBrand_Id(
+                    saveRequest.getItemCode(), saveRequest.getItemBrand()
+            );
+
+            if (existingItem.isPresent()) {
+                throw new RuntimeException("Item already exists with this code and brand.");
+            }
+
+            // Create new item
             Item item = new Item();
             item.setItemCode(saveRequest.getItemCode());
             item.setItemDescription(saveRequest.getItemDescription());
@@ -47,12 +58,12 @@ public class ItemServiceImplementation implements ItemService {
             item.setStatus(Status.ACTIVE);
 
             Item saveResponse = itemRepository.save(item);
-
             return returnResponse(saveResponse);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
 
     @Override
     public List<ItemResponse> getAll() {
@@ -120,8 +131,8 @@ public class ItemServiceImplementation implements ItemService {
         response.setId(item.getId());
         response.setItemCode(item.getItemCode());
         response.setItemDescription(item.getItemDescription());
-//        response.setPackSize(item.getPackSize());
-//        response.setPackUnit(item.getPackUnit());
+        response.setPackSize(item.getPackSize());
+        response.setPackUnit(item.getPackUnit());
         response.setWholesalePrice(item.getWholesalePrice());
         response.setRetailPrice(item.getRetailPrice());
         response.setItemBrand(brandConversion(item.getItemBrand()));
@@ -130,6 +141,7 @@ public class ItemServiceImplementation implements ItemService {
         response.setCreatedDateTime(item.getCreatedDateTime());
         response.setModifiedBy(item.getModifiedBy());
         response.setModifiedDateTime(item.getModifiedDateTime());
+        response.setAvailableStock(item.getAvailableStock());
 
         return response;
     }

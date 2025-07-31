@@ -13,11 +13,13 @@ public class ItemSaveRequest {
 
     private double retailPrice;
 
-    private Integer itemBrand;
-
-    private String createdBy;
-
     private String packSize;
 
     private String packUnit;
+
+    private double availableStock;
+
+    private Integer itemBrand;
+
+    private String createdBy;
 }
