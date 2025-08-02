@@ -8,9 +8,11 @@ import com.example.oil_mart.dto.response.ItemResponse;
 import com.example.oil_mart.enums.Status;
 import com.example.oil_mart.model.Brand;
 import com.example.oil_mart.model.Category;
+import com.example.oil_mart.model.GrnItem;
 import com.example.oil_mart.model.Item;
 import com.example.oil_mart.repository.BrandRepository;
 import com.example.oil_mart.repository.CategoryRepository;
+import com.example.oil_mart.repository.GRNItemRepository;
 import com.example.oil_mart.repository.ItemRepository;
 import com.example.oil_mart.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,9 @@ public class ItemServiceImplementation implements ItemService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private GRNItemRepository grnItemRepository;
 
     @Override
     public ItemResponse save(ItemSaveRequest saveRequest) {
@@ -111,19 +116,23 @@ public class ItemServiceImplementation implements ItemService {
 
     @Override
     public ItemResponse deleteById(Integer id) {
-        try {
-            Item item = itemRepository.findById(id).orElse(null);
 
+            List<GrnItem> grnItems = grnItemRepository.findByItemIdIn(List.of(Long.valueOf(id)));
+
+            if (grnItems != null && !grnItems.isEmpty()) {
+                throw new RuntimeException("This item has associated GRN: " + id);
+            }
+
+            Item item = itemRepository.findById(id).orElse(null);
             if (item == null) {
                 throw new RuntimeException("Item not found with ID: " + id);
             }
 
             itemRepository.delete(item);
             return returnResponse(item);
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting item", e);
-        }
+
     }
+
 
     private static ItemResponse returnResponse(Item item) {
         ItemResponse response = new ItemResponse();
