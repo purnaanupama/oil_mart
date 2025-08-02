@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Integer> {
     List<Item> findByItemBrand_Id(Integer brandId);
-
+    Item findById(Long id);
     Optional<Item> findByItemCodeAndItemBrand_Id(String itemCode, Integer brandId);
 }

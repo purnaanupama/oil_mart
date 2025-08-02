@@ -20,4 +20,6 @@ public interface ItemService {
 
     ItemResponse deleteById(Integer Id);
 
+    List<ItemResponse> getAllByNotEmptyQuatity();
+
 }
