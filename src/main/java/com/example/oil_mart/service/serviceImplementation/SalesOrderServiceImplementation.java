@@ -109,7 +109,6 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         salesOrderRepository.delete(salesOrder);
     }
 
-
     @Override
     public SalesOrderResponse updateSalesOrder(SalesOrderUpdateRequest request) {
         Sales_Order salesOrder = salesOrderRepository.findById(request.getId())
@@ -153,12 +152,6 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         }
 
         return buildSalesOrderResponse(salesOrder);
-    }
-
-    @Override
-    public String getLastSalesOrderNumber() {
-        Sales_Order lastOrder = salesOrderRepository.findTopByOrderByIdDesc();
-        return lastOrder != null ? lastOrder.getSalesOrderNo() : "SAL-2025-001";
     }
 
     //Only Update Sales Order Item

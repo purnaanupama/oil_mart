@@ -50,12 +50,4 @@ public class SalesOrderController {
     public void deleteSalesOrderItemById(@PathVariable Long salesOrderId, @PathVariable Long itemId) {
         salesOrderService.deleteSalesOrderItemById(salesOrderId, itemId);
     }
-
-    // Make sure this is above the {id} mapping
-    @GetMapping("/last-number")
-    public String getLastSalesOrderNumber() {
-        return salesOrderService.getLastSalesOrderNumber();
-    }
-
-
 }
