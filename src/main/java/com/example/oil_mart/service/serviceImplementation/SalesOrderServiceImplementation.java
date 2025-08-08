@@ -109,6 +109,7 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         salesOrderRepository.delete(salesOrder);
     }
 
+
     @Override
     public SalesOrderResponse updateSalesOrder(SalesOrderUpdateRequest request) {
         Sales_Order salesOrder = salesOrderRepository.findById(request.getId())
