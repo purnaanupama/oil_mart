@@ -16,6 +16,6 @@ public interface SalesOrderService {
     SalesOrderResponse updateSalesOrder(SalesOrderUpdateRequest request);
     SalesOrderResponse updateSalesOrderItem(SalesOrderItemUpdateRequest request);
     void deleteSalesOrderItemById(Long SalesOrderId,Long id);
-    String getLastSalesOrderNumber();
+    String getLastOrderNumber();
 
 }

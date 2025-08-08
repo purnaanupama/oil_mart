@@ -51,11 +51,9 @@ public class SalesOrderController {
         salesOrderService.deleteSalesOrderItemById(salesOrderId, itemId);
     }
 
-    // Make sure this is above the {id} mapping
-    @GetMapping("/last-number")
-    public String getLastSalesOrderNumber() {
-        return salesOrderService.getLastSalesOrderNumber();
+    @GetMapping("/last-order-number")
+    public String getLastOrderNumber() {
+        // Assuming the service has a method to get the last order number
+        return salesOrderService.getLastOrderNumber();
     }
-
-
 }
