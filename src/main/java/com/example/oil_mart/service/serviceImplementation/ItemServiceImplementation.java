@@ -122,15 +122,12 @@ public class ItemServiceImplementation implements ItemService {
             if (grnItems != null && !grnItems.isEmpty()) {
                 throw new RuntimeException("This item has associated GRN: " + id);
             }
-
             Item item = itemRepository.findById(id).orElse(null);
             if (item == null) {
                 throw new RuntimeException("Item not found with ID: " + id);
             }
-
             itemRepository.delete(item);
             return returnResponse(item);
-
     }
 
 
