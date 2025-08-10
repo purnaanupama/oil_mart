@@ -38,6 +38,16 @@ public class ItemController {
         }
     }
 
+    @GetMapping("not-empty-quantity")
+    public ResponseEntity<List<ItemResponse>> getAllByNotEmptyQuantity() {
+        try {
+            List<ItemResponse> getAllResponse = itemService.getAllByNotEmptyQuatity();
+            return ResponseEntity.ok(getAllResponse);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @GetMapping("{itemId}")
     public ResponseEntity<ItemResponse> getByItemId(@PathVariable("itemId") Integer id) {
         try {

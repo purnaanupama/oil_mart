@@ -122,12 +122,29 @@ public class ItemServiceImplementation implements ItemService {
             if (grnItems != null && !grnItems.isEmpty()) {
                 throw new RuntimeException("This item has associated GRN: " + id);
             }
+
             Item item = itemRepository.findById(id).orElse(null);
             if (item == null) {
                 throw new RuntimeException("Item not found with ID: " + id);
             }
+
             itemRepository.delete(item);
             return returnResponse(item);
+
+    }
+
+    @Override
+    public List<ItemResponse> getAllByNotEmptyQuatity() {
+        try {
+            //check if the item has available stock greater than 0
+            return itemRepository.findAll().stream()
+                    .filter(item -> item.getAvailableStock() > 0)
+                    .map(ItemServiceImplementation::returnResponse)
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -174,4 +191,6 @@ public class ItemServiceImplementation implements ItemService {
 
         return categoryResponse;
     }
+
+
 }
