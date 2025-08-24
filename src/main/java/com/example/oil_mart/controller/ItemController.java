@@ -3,6 +3,7 @@ package com.example.oil_mart.controller;
 import com.example.oil_mart.dto.request.ItemSaveRequest;
 import com.example.oil_mart.dto.request.ItemUpdateRequest;
 import com.example.oil_mart.dto.response.ItemResponse;
+import com.example.oil_mart.dto.response.PageResponse;
 import com.example.oil_mart.model.GrnItem;
 import com.example.oil_mart.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,21 @@ public class ItemController {
         try {
             List<ItemResponse> getAllResponse = itemService.getAll();
             return ResponseEntity.ok(getAllResponse);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @GetMapping("paginated")
+    public ResponseEntity<PageResponse<ItemResponse>> getAllItemsPaginated(
+            @RequestParam(defaultValue = "1") int page,            // 1-based
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDir
+    ) {
+        try {
+            var response = itemService.getAll(page, size, sortBy, sortDir);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -18,6 +18,9 @@ public class Grn {
     @Column(name = "GRN_NUMBER", nullable = false, length = 45, unique = true)
     private String grnNumber;
 
+    @Column(name = "INVOICE_NUMBER", nullable = false)
+    private String invoiceNumber;
+
     @Column(name = "TOTAL_AMOUNT", nullable = false)
     private Double totalAmount;
 

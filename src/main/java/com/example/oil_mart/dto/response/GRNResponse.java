@@ -7,6 +7,7 @@ import java.util.List;
 public class GRNResponse {
     private Integer id;
     private String grnNumber;
+    private String invoiceNumber;
     private double totalAmount;
     private String createdAt; // Timestamp of creation
     private List<GRNItemResponse> items;

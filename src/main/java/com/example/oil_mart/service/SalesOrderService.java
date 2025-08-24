@@ -13,8 +13,8 @@ public interface SalesOrderService {
     List<SalesOrderResponse> getSalesOrders();
     SalesOrderResponse getSalesOrderById(Long id);
     void deleteSalesOrderById(Long id);
-    SalesOrderResponse updateSalesOrder(SalesOrderUpdateRequest request);
-    SalesOrderResponse updateSalesOrderItem(SalesOrderItemUpdateRequest request);
+//    SalesOrderResponse updateSalesOrder(SalesOrderUpdateRequest request);
+//    SalesOrderResponse updateSalesOrderItem(SalesOrderItemUpdateRequest request);
     void deleteSalesOrderItemById(Long SalesOrderId,Long id);
     String getLastOrderNumber();
 

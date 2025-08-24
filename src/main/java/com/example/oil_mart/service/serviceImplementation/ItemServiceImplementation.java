@@ -5,6 +5,7 @@ import com.example.oil_mart.dto.request.ItemUpdateRequest;
 import com.example.oil_mart.dto.response.BrandResponse;
 import com.example.oil_mart.dto.response.CategoryResponse;
 import com.example.oil_mart.dto.response.ItemResponse;
+import com.example.oil_mart.dto.response.PageResponse;
 import com.example.oil_mart.enums.Status;
 import com.example.oil_mart.model.Brand;
 import com.example.oil_mart.model.Category;
@@ -17,6 +18,7 @@ import com.example.oil_mart.repository.ItemRepository;
 import com.example.oil_mart.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,13 +29,10 @@ public class ItemServiceImplementation implements ItemService {
 
     @Autowired
     private ItemRepository itemRepository;
-
     @Autowired
     private BrandRepository brandRepository;
-
     @Autowired
     private CategoryRepository categoryRepository;
-
     @Autowired
     private GRNItemRepository grnItemRepository;
 
@@ -45,9 +44,7 @@ public class ItemServiceImplementation implements ItemService {
                     saveRequest.getItemCode(), saveRequest.getItemBrand()
             );
 
-            if (existingItem.isPresent()) {
-                throw new RuntimeException("Item already exists with this code and brand.");
-            }
+            if (existingItem.isPresent()) { throw new RuntimeException("Item already exists with this code and brand.");}
 
             // Create new item
             Item item = new Item();
@@ -64,6 +61,36 @@ public class ItemServiceImplementation implements ItemService {
 
             Item saveResponse = itemRepository.save(item);
             return returnResponse(saveResponse);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public PageResponse<ItemResponse> getAll(int page, int size, String sortBy, String sortDir) {
+        try {
+            // Spring Data uses 0-based; we convert 1-based -> 0-based
+            int pageIndex = Math.max(page - 1, 0);
+            Sort sort = "ASC".equalsIgnoreCase(sortDir)
+                    ? Sort.by(sortBy).ascending()
+                    : Sort.by(sortBy).descending();
+
+            Pageable pageable = PageRequest.of(pageIndex, size, sort);
+            Page<Item> pageData = itemRepository.findAll(pageable);
+
+            var content = pageData.getContent()
+                    .stream()
+                    .map(ItemServiceImplementation::returnResponse)
+                    .collect(Collectors.toList());
+
+            return new PageResponse<>(
+                    content,
+                    pageIndex + 1,                 // back to 1-based
+                    size,
+                    pageData.getTotalElements(),
+                    pageData.getTotalPages(),
+                    pageData.isLast()
+            );
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -127,10 +154,8 @@ public class ItemServiceImplementation implements ItemService {
             if (item == null) {
                 throw new RuntimeException("Item not found with ID: " + id);
             }
-
             itemRepository.delete(item);
             return returnResponse(item);
-
     }
 
     @Override
@@ -150,7 +175,6 @@ public class ItemServiceImplementation implements ItemService {
 
     private static ItemResponse returnResponse(Item item) {
         ItemResponse response = new ItemResponse();
-
         response.setId(item.getId());
         response.setItemCode(item.getItemCode());
         response.setItemDescription(item.getItemDescription());
@@ -165,6 +189,8 @@ public class ItemServiceImplementation implements ItemService {
         response.setModifiedBy(item.getModifiedBy());
         response.setModifiedDateTime(item.getModifiedDateTime());
         response.setAvailableStock(item.getAvailableStock());
+        response.setStockInLiters(item.getStockInLiters());
+        response.setStockInMillilitres(item.getStockInMillilitres());
 
         return response;
     }

@@ -12,20 +12,14 @@ public class Customer{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "CUSTOMER_No", unique = true, nullable = false, length = 40)
-    private  String customerNo;
+    @Column(name = "CUSTOMER_CODE", unique = true, nullable = false, length = 40)
+    private  String customer_code;
 
     @Column(name = "CUSTOMER_NAME", nullable = false, length = 100)
     private String customer_name;
 
-    @Column(name = "CUSTOMER_ADDRESS", length = 255)
-    private String customer_address;
-
     @Column(name = "CUSTOMER_PHONE", length = 15)
     private String customer_phone;
-
-    @Column(name = "CUSTOMER_NIC", length = 12)
-    private String customer_nic;
 
     @Column(name = "Created_At", nullable = false)
     private String createdAt;
