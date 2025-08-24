@@ -28,6 +28,6 @@ public class Sales_Order {
     private String createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "CUSTOMER_ID", nullable = false)
+    @JoinColumn(name = "CUSTOMER_ID")
     private Customer customer;
 }

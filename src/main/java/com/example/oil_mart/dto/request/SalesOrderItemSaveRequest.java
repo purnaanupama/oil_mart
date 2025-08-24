@@ -7,6 +7,9 @@ public class SalesOrderItemSaveRequest {
     private Long itemId;
     private Integer quantity;
     private Double soItemUnitPrice;
+    private Double quantityLiters;
+    private Integer quantityMilliliters;
+    private Boolean isLoose;
     private Double soItemTotalAmount;
     private String createdAt;
 }

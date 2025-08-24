@@ -33,6 +33,7 @@ public class GRNServiceImplementation implements GRNService {
         Grn grn = new Grn();
         grn.setGrnNumber(request.getGrnNumber());
         grn.setTotalAmount(request.getTotalAmount());
+        grn.setInvoiceNumber(request.getInvoiceNumber());
 
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
         LocalDateTime createdAt = request.getCreatedAt() == null ?
@@ -45,9 +46,7 @@ public class GRNServiceImplementation implements GRNService {
         for (GRNItemSaveRequest itemRequest : request.getItems()) {
             GrnItem item = new GrnItem();
             item.setItemId(itemRequest.getItemId());
-            // Convert double to Integer if necessary
             item.setQuantity((int) itemRequest.getQuantity());
-            // Correct method names based on likely DTO structure
             item.setUnitPrice(itemRequest.getUnitPrice());
             item.setTotalAmount(itemRequest.getTotalPrice());
             item.setSupplierName(itemRequest.getSupplier_name());
@@ -57,15 +56,39 @@ public class GRNServiceImplementation implements GRNService {
             Item stockItem = itemRepository.findById(Math.toIntExact(item.getItemId()))
                     .orElseThrow(() -> new RuntimeException("Item not found with ID: " + itemRequest.getItemId()));
 
-            double newStock = stockItem.getAvailableStock() + itemRequest.getQuantity();
-            stockItem.setAvailableStock(newStock);
+            // --- Parse pack size safely ---
+            double packSizeValue = 0.0;
+            try {
+                packSizeValue = Double.parseDouble(stockItem.getPackSize());
+            } catch (NumberFormatException e) {
+                throw new RuntimeException("Invalid pack size for item: " + stockItem.getItemCode());
+            }
+
+            double totalQty = itemRequest.getQuantity(); // number of packs
+            double litersToAdd = 0.0;
+            double mlToAdd = 0.0;
+
+            if (stockItem.getPackUnit().equalsIgnoreCase("l")) {
+                // Example: 2 packs × 5L = 10L → store in liters & milliliters
+                litersToAdd = totalQty * packSizeValue;
+                mlToAdd = litersToAdd * 1000;
+            } else if (stockItem.getPackUnit().equalsIgnoreCase("ml")) {
+                // Example: 2 packs × 500ml = 1000ml = 1.0L
+                mlToAdd = totalQty * packSizeValue;
+                litersToAdd = mlToAdd / 1000.0;
+            }
+
+            // --- Update stock values ---
+            stockItem.setAvailableStock(stockItem.getAvailableStock() + totalQty);
+            stockItem.setStockInLiters(stockItem.getStockInLiters() + litersToAdd);
+            stockItem.setStockInMillilitres(stockItem.getStockInMillilitres() + mlToAdd);
+
             itemRepository.save(stockItem);
             items.add(item);
         }
 
         grn.setItems(items);
         Grn savedGrn = grnRepository.save(grn);
-
         return convertToResponse(savedGrn);
     }
 
@@ -76,13 +99,18 @@ public class GRNServiceImplementation implements GRNService {
     }
 
     private GRNResponse convertToResponse(Grn grn) {
+
         GRNResponse response = new GRNResponse();
         response.setId(grn.getGrnId().intValue());
         response.setGrnNumber(grn.getGrnNumber());
         response.setTotalAmount(grn.getTotalAmount());
         response.setCreatedAt(grn.getCreatedAt().toString());
+        response.setInvoiceNumber(grn.getInvoiceNumber());
 
         List<GRNItemResponse> itemResponses = grn.getItems().stream().map(item -> {
+            Item solidItem = itemRepository.findById(item.getItemId())
+                    .orElseThrow(() -> new RuntimeException("Item not found with ID: " + item.getItemId()));;
+            if (solidItem == null) return null;
             GRNItemResponse itemResponse = new GRNItemResponse();
             itemResponse.setId(item.getId());
             itemResponse.setItemId(item.getItemId());
@@ -91,6 +119,8 @@ public class GRNServiceImplementation implements GRNService {
             itemResponse.setTotalAmount(item.getTotalAmount());
             itemResponse.setSupplierName(item.getSupplierName());
             itemResponse.setCreatedAt(item.getCreatedAt().toString());
+
+            itemResponse.setItemCode(solidItem.getItemCode());
             return itemResponse;
         }).collect(Collectors.toList());
 
@@ -101,22 +131,48 @@ public class GRNServiceImplementation implements GRNService {
     @Override
     @Transactional
     public void deleteGRN(Long id) {
-        Grn grn = grnRepository.findById(id).orElseThrow(() -> new RuntimeException("GRN not found"));
+        Grn grn = grnRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("GRN not found"));
 
         for (GrnItem item : grn.getItems()) {
             Item stockItem = itemRepository.findById(item.getItemId().intValue())
                     .orElseThrow(() -> new RuntimeException("Item not found with ID: " + item.getItemId()));
 
+            // Subtract the quantity from available stock
             double newStock = stockItem.getAvailableStock() - item.getQuantity();
             stockItem.setAvailableStock(newStock);
+
+            // Adjust stock in liters and millilitres
+            double packSize = 0;
+            try {
+                packSize = Double.parseDouble(stockItem.getPackSize());
+            } catch (NumberFormatException e) {
+                // If packSize is invalid, treat as 0
+            }
+
+            String packUnit = stockItem.getPackUnit().toLowerCase();
+
+            if ("l".equals(packUnit)) {
+                stockItem.setStockInLiters(stockItem.getStockInLiters() - (item.getQuantity() * packSize));
+                stockItem.setStockInMillilitres(stockItem.getStockInMillilitres() - (item.getQuantity() * packSize * 1000));
+            } else if ("ml".equals(packUnit)) {
+                double liters = packSize / 1000.0;
+                stockItem.setStockInLiters(stockItem.getStockInLiters() - (item.getQuantity() * liters));
+                stockItem.setStockInMillilitres(stockItem.getStockInMillilitres() - (item.getQuantity() * packSize));
+            } else {
+                // Treat as unit (no liters/millilitres)
+            }
+
             itemRepository.save(stockItem);
         }
 
-        // Delete all grn_items associated with the grn_id
-        grn.getItems().clear(); // Ensures the relationship is cleared if cascade is not configured
+        // Clear GRN items to maintain DB integrity
+        grn.getItems().clear();
 
-        grnRepository.delete(grn); // Deletes the GRN
+        // Delete the GRN
+        grnRepository.delete(grn);
     }
+
 
     //method for get all GRNs
     @Override

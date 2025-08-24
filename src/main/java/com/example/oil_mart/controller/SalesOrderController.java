@@ -18,6 +18,7 @@ public class SalesOrderController {
 
     @PostMapping
     public SalesOrderResponse saveSalesOrder(@RequestBody SalesOrderSaveRequest request) {
+        System.out.println("this works");
         return salesOrderService.saveSalesOrder(request);
     }
 
@@ -36,15 +37,6 @@ public class SalesOrderController {
         salesOrderService.deleteSalesOrderById(id);
     }
 
-    @PutMapping
-    public SalesOrderResponse updateSalesOrder(@RequestBody SalesOrderUpdateRequest request) {
-        return salesOrderService.updateSalesOrder(request);
-    }
-
-    @PutMapping("/item")
-    public SalesOrderResponse updateSalesOrderItem(@RequestBody SalesOrderItemUpdateRequest request) {
-        return salesOrderService.updateSalesOrderItem(request);
-    }
 
     @DeleteMapping("/{salesOrderId}/item/{itemId}")
     public void deleteSalesOrderItemById(@PathVariable Long salesOrderId, @PathVariable Long itemId) {

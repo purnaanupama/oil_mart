@@ -22,13 +22,10 @@ public class CustomerServiceImplementation implements CustomerService {
     public CustomerResponse saveCustomer(CustomerSaveRequest saveRequest) {
         try {
             Customer customer = new Customer();
-            customer.setCustomerNo(saveRequest.getCustomerNo());
+            customer.setCustomer_code(saveRequest.getCustomerCode());
             customer.setCustomer_name(saveRequest.getCustomerName());
-            customer.setCustomer_address(saveRequest.getCustomerAddress());
             customer.setCustomer_phone(saveRequest.getCustomerPhone());
-            customer.setCustomer_nic(saveRequest.getCustomerNic());
             customer.setCreatedAt(saveRequest.getCreatedAt());
-
             Customer savedCustomer = customerRepository.save(customer);
             return returnResponse(savedCustomer);
         } catch (Exception e) {
@@ -56,11 +53,9 @@ public class CustomerServiceImplementation implements CustomerService {
         Customer customer = customerRepository.findById(updateRequest.getId())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        customer.setCustomerNo(updateRequest.getCustomerNo());
+//        customer.setCustomerNo(updateRequest.getCustomerNo());
         customer.setCustomer_name(updateRequest.getCustomerName());
-        customer.setCustomer_address(updateRequest.getCustomerAddress());
         customer.setCustomer_phone(updateRequest.getCustomerPhone());
-        customer.setCustomer_nic(updateRequest.getCustomerNic());
         customer.setCreatedAt(updateRequest.getCreatedAt());
 
         Customer updatedCustomer = customerRepository.save(customer);
@@ -82,11 +77,9 @@ public class CustomerServiceImplementation implements CustomerService {
     private CustomerResponse returnResponse(Customer customer) {
         CustomerResponse response = new CustomerResponse();
         response.setId(customer.getId());
-        response.setCustomerNo(customer.getCustomerNo());
+        response.setCustomerCode(customer.getCustomer_code());
         response.setCustomerName(customer.getCustomer_name());
-        response.setCustomerAddress(customer.getCustomer_address());
         response.setCustomerPhone(customer.getCustomer_phone());
-        response.setCustomerNic(customer.getCustomer_nic());
         response.setCreatedAt(customer.getCreatedAt());
         return response;
     }

@@ -7,13 +7,21 @@ import lombok.Data;
 @Entity
 @Table(name = "SALES_ORDER_ITEM")
 public class Sales_Order_Item {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "QUANTITY", nullable = false)
+    @Column(name = "QUANTITY", nullable = true)
     private Integer quantity;
+
+    @Column(name = "QUANTITY_IN_L", nullable = true)
+    private Double quantityLiters;
+
+    @Column(name = "QUANTITY_IN_ML", nullable = true)
+    private Integer quantityMilliliters;
+
+    @Column(name = "IS_LOOSE", nullable = true)
+    private Boolean isLoose;
 
     @Column(name = "SO_ITEM_UNIT_PRICE", nullable = false)
     private Double soItemUnitPrice;

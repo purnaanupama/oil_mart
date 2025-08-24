@@ -24,6 +24,10 @@ public class ItemResponse {
 
     private double availableStock;
 
+    private double stockInLiters;
+
+    private double stockInMillilitres;
+
     private BrandResponse itemBrand;
 
     private Status status;
