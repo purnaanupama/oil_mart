@@ -28,12 +28,6 @@ public class Return_item {
     @Column(name = "Quantity_In_ML", nullable = false)
     private Double quantityMiliLitres;
 
-    @Column(name = "UNIT_PRICE", nullable = false)
-    private Double unitPrice;
-
-    @Column(name = "TOTAL_AMOUNT", nullable = false)
-    private Double totalAmount;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RETURN_ID", nullable = false)
     private Return returnRecord;

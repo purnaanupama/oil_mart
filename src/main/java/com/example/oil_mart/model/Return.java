@@ -17,9 +17,6 @@ public class Return {
     @Column(name = "RO_NUMBER", nullable = false, length = 45, unique = true)
     private String RONumber;
 
-    @Column(name = "TOTAL_AMOUNT", nullable = false)
-    private Double totalAmount;
-
     @Column(name = "CREATED_AT", nullable = false)
     private String createdAt;
 

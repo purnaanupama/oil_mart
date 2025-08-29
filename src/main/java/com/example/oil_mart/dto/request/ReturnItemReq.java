@@ -8,8 +8,6 @@ public class ReturnItemReq {
     private int quantity;
     private Double quantityLitres;
     private Double quantityMiliLitres;
-    private Double unitPrice;
-    private Double totalAmount;
     private Boolean isLoose;
     // getters and setters
 }

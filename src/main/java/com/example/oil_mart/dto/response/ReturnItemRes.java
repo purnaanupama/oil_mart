@@ -10,8 +10,6 @@ public class ReturnItemRes {
     private Integer quantity;
     private Double quantityLitres;
     private Double quantityMiliLitres;
-    private Double unitPrice;
-    private Double totalAmount;
     // getters and setters
 }
 

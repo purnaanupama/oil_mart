@@ -8,7 +8,6 @@ import java.util.List;
 public class ReturnRes {
     private Long id;
     private String RONumber;
-    private Double totalAmount;
     private String createdAt;
     private List<ReturnItemRes> items;
     // getters and setters

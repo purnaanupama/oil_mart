@@ -46,7 +46,6 @@ public class ReturnServiceImplementation implements ReturnService {
         // 1️⃣ Create and save Return Header
         Return returnRecord = new Return();
         returnRecord.setRONumber(request.getRONumber());
-        returnRecord.setTotalAmount(request.getTotalAmount());
         returnRecord.setCreatedAt(request.getCreatedAt());
         returnRecord = returnRepository.save(returnRecord);
 
@@ -60,9 +59,7 @@ public class ReturnServiceImplementation implements ReturnService {
                 returnItem.setQuantity(itemReq.getQuantity());
                 returnItem.setQuantityLitres(itemReq.getQuantityLitres());
                 returnItem.setQuantityMiliLitres(itemReq.getQuantityMiliLitres());
-                returnItem.setUnitPrice(itemReq.getUnitPrice());
                 returnItem.setItemId(itemReq.getItemId());
-                returnItem.setTotalAmount(itemReq.getTotalAmount());
 
                 // Fetch the item
                 Item foundItem = itemRepository.findById(returnItem.getItemId())
@@ -81,8 +78,6 @@ public class ReturnServiceImplementation implements ReturnService {
                 itemRes.setQuantity(returnItem.getQuantity());
                 itemRes.setQuantityLitres(returnItem.getQuantityLitres());
                 itemRes.setQuantityMiliLitres(returnItem.getQuantityMiliLitres());
-                itemRes.setUnitPrice(returnItem.getUnitPrice());
-                itemRes.setTotalAmount(returnItem.getTotalAmount());
                 itemRes.setIsLoose(returnItem.getIsLoose());
                 returnItemResponses.add(itemRes);
             }
@@ -91,7 +86,6 @@ public class ReturnServiceImplementation implements ReturnService {
         // 3️⃣ Prepare response
         ReturnRes response = new ReturnRes();
         response.setRONumber(returnRecord.getRONumber());
-        response.setTotalAmount(returnRecord.getTotalAmount());
         response.setCreatedAt(returnRecord.getCreatedAt());
         response.setId(returnRecord.getId());
         response.setItems(returnItemResponses); // Set returned items
@@ -208,7 +202,6 @@ public class ReturnServiceImplementation implements ReturnService {
 
         // Update return record
         existingReturn.setRONumber(request.getRONumber());
-        existingReturn.setTotalAmount(request.getTotalAmount());
         existingReturn.setCreatedAt(request.getCreatedAt());
         existingReturn = returnRepository.save(existingReturn);
 
@@ -222,9 +215,7 @@ public class ReturnServiceImplementation implements ReturnService {
                 returnItem.setQuantity(itemReq.getQuantity());
                 returnItem.setQuantityLitres(itemReq.getQuantityLitres());
                 returnItem.setQuantityMiliLitres(itemReq.getQuantityMiliLitres());
-                returnItem.setUnitPrice(itemReq.getUnitPrice());
                 returnItem.setItemId(itemReq.getItemId());
-                returnItem.setTotalAmount(itemReq.getTotalAmount());
 
                 Item foundItem = itemRepository.findById(returnItem.getItemId())
                         .orElseThrow(() -> new RuntimeException("Item not found with ID: " + returnItem.getItemId()));
@@ -240,8 +231,6 @@ public class ReturnServiceImplementation implements ReturnService {
                 itemRes.setQuantity(returnItem.getQuantity());
                 itemRes.setQuantityLitres(returnItem.getQuantityLitres());
                 itemRes.setQuantityMiliLitres(returnItem.getQuantityMiliLitres());
-                itemRes.setUnitPrice(returnItem.getUnitPrice());
-                itemRes.setTotalAmount(returnItem.getTotalAmount());
                 itemRes.setIsLoose(returnItem.getIsLoose());
                 returnItemResponses.add(itemRes);
             }
@@ -249,7 +238,6 @@ public class ReturnServiceImplementation implements ReturnService {
 
         ReturnRes response = new ReturnRes();
         response.setRONumber(existingReturn.getRONumber());
-        response.setTotalAmount(existingReturn.getTotalAmount());
         response.setCreatedAt(existingReturn.getCreatedAt());
         response.setId(existingReturn.getId());
         response.setItems(returnItemResponses);
@@ -289,8 +277,6 @@ public class ReturnServiceImplementation implements ReturnService {
             itemRes.setQuantity(item.getQuantity());
             itemRes.setQuantityLitres(item.getQuantityLitres());
             itemRes.setQuantityMiliLitres(item.getQuantityMiliLitres());
-            itemRes.setUnitPrice(item.getUnitPrice());
-            itemRes.setTotalAmount(item.getTotalAmount());
             itemRes.setIsLoose(item.getIsLoose());
             returnItemResponses.add(itemRes);
         }
@@ -298,7 +284,6 @@ public class ReturnServiceImplementation implements ReturnService {
         ReturnRes response = new ReturnRes();
         response.setId(returnRecord.getId());
         response.setRONumber(returnRecord.getRONumber());
-        response.setTotalAmount(returnRecord.getTotalAmount());
         response.setCreatedAt(returnRecord.getCreatedAt());
         response.setItems(returnItemResponses);
         return response;
