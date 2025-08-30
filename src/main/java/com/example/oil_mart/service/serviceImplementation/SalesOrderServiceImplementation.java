@@ -5,13 +5,8 @@ import com.example.oil_mart.dto.request.SalesOrderSaveRequest;
 import com.example.oil_mart.dto.request.SalesOrderUpdateRequest;
 import com.example.oil_mart.dto.response.SalesOrderItemResponse;
 import com.example.oil_mart.dto.response.SalesOrderResponse;
-import com.example.oil_mart.model.Item;
-import com.example.oil_mart.model.Sales_Order;
-import com.example.oil_mart.model.Sales_Order_Item;
-import com.example.oil_mart.repository.CustomerRepository;
-import com.example.oil_mart.repository.ItemRepository;
-import com.example.oil_mart.repository.SalesOrderItemRepository;
-import com.example.oil_mart.repository.SalesOrderRepository;
+import com.example.oil_mart.model.*;
+import com.example.oil_mart.repository.*;
 import com.example.oil_mart.service.SalesOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +32,12 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private SalesProfitRepository salesProfitRepository;
+
+    @Autowired
+    private GRNItemRepository grnItemRepository;
+
     @Override
     @Transactional
     public SalesOrderResponse saveSalesOrder(SalesOrderSaveRequest request) {
@@ -58,7 +59,7 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
             salesOrder.setCustomer(customerRepository.findById(request.getCustomerId())
                     .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + request.getCustomerId())));
         } else {
-            salesOrder.setCustomer(null); // No customer for CASH sales
+            salesOrder.setCustomer(null);
         }
 
         salesOrder.setCreatedAt(request.getCreatedAt() != null ? request.getCreatedAt() : LocalDateTime.now().toString());
@@ -66,6 +67,8 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         salesOrder = salesOrderRepository.save(salesOrder);
 
         // 2️⃣ Process Sales Order Items
+        double totalProfit = 0.0;
+
         if (request.getItems() != null && !request.getItems().isEmpty()) {
             Sales_Order finalSalesOrder = salesOrder;
 
@@ -93,7 +96,6 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
                 orderItem.setQuantity(itemReq.getQuantity() != null ? itemReq.getQuantity() : 0);
                 orderItem.setQuantityLiters(itemReq.getQuantityLiters());
 
-                // Convert Integer to Integer for quantityMilliliters
                 if (itemReq.getQuantityMilliliters() != null) {
                     orderItem.setQuantityMilliliters(itemReq.getQuantityMilliliters());
                 } else {
@@ -109,9 +111,75 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
             }).toList();
 
             salesOrderItemRepository.saveAll(orderItems);
+
+            // 3️⃣ Calculate profit for each item
+            for (int i = 0; i < orderItems.size(); i++) {
+                Sales_Order_Item orderItem = orderItems.get(i);
+                var itemRequest = request.getItems().get(i);
+
+                double itemProfit = calculateItemProfit(orderItem, itemRequest);
+                totalProfit += itemProfit;
+            }
         }
 
+        // 4️⃣ Save total profit
+        saveSalesProfit(salesOrder.getSalesOrderNo(), salesOrder.getSalesOrderType(), totalProfit);
+
+
         return buildSalesOrderResponse(salesOrder);
+    }
+
+    private double calculateItemProfit(Sales_Order_Item orderItem, com.example.oil_mart.dto.request.SalesOrderItemSaveRequest itemRequest) {
+        Item item = orderItem.getItem();
+
+        // Get latest GRN price for this item
+        GrnItem latestGrnItem = grnItemRepository
+                .findTopByItemIdOrderByCreatedAtDesc(Long.valueOf(item.getId()))
+                .orElseThrow(() -> new RuntimeException("No GRN record found for item: " + item.getItemCode()));
+
+        double costPrice = latestGrnItem.getUnitPrice();
+        double salePrice = orderItem.getSoItemTotalAmount();
+
+        // Check if this is a loose sale or pack-based sale
+        if (itemRequest.getIsLoose() != null && itemRequest.getIsLoose()) {
+            // LOOSE SALE - calculate based on volume
+            double packSizeInLiters = getPackSizeInLiters(item);
+            double costPerMl = costPrice / (packSizeInLiters * 1000); // cost per ml
+
+            // Calculate total ml sold
+            double totalMlSold = 0;
+            if (orderItem.getQuantity() != null && orderItem.getQuantity() > 0) {
+                totalMlSold += orderItem.getQuantity() * packSizeInLiters * 1000;
+            }
+            if (orderItem.getQuantityLiters() != null) {
+                totalMlSold += orderItem.getQuantityLiters() * 1000;
+            }
+            if (orderItem.getQuantityMilliliters() != null) {
+                totalMlSold += orderItem.getQuantityMilliliters();
+            }
+
+            double totalCost = totalMlSold * costPerMl;
+            return salePrice - totalCost;
+
+        } else {
+            // PACK-BASED SALE - direct unit calculation
+            int quantitySold = orderItem.getQuantity() != null ? orderItem.getQuantity() : 0;
+            double totalCost = quantitySold * costPrice;
+            return salePrice - totalCost;
+        }
+    }
+
+    /**
+     * Save profit record to SalesProfit table
+     */
+    private void saveSalesProfit(String salesOrderNo, String salesOrderType, double totalProfit) {
+        SalesProfit salesProfit = new SalesProfit();
+        salesProfit.setSalesOrderNo(salesOrderNo);
+        salesProfit.setSalesOrderType(salesOrderType);
+        salesProfit.setTotalProfitAmount(totalProfit);
+        salesProfit.setCreatedAt(LocalDateTime.now().toString());
+
+        salesProfitRepository.save(salesProfit);
     }
 
     @Override
@@ -216,47 +284,6 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         item.setAvailableStock(newPackQuantity);
     }
 
-    // Helper method to deduct stock using liquid-based calculations
-//    private void deductItemStock(Item item, Integer quantity, Double quantityLiters, Integer quantityMilliliters) {
-//        // Parse pack size to liters
-//        double packSizeInLiters = getPackSizeInLiters(item);
-//
-//        // Calculate total liters to deduct
-//        double totalDeductLiters = 0.0;
-//        if (quantity != null && quantity > 0) {
-//            totalDeductLiters += quantity * packSizeInLiters;
-//        }
-//        if (quantityLiters != null) {
-//            totalDeductLiters += quantityLiters;
-//        }
-//        if (quantityMilliliters != null) {
-//            totalDeductLiters += quantityMilliliters / 1000.0;
-//        }
-//
-//        // Check if we have enough liquid stock
-//        double newStockInLiters = item.getStockInLiters() - totalDeductLiters;
-//        if (newStockInLiters < 0) {
-//            throw new RuntimeException("Insufficient stock (liters) for item ID: " + item.getId() +
-//                    ". Required: " + totalDeductLiters + "L, Available: " + item.getStockInLiters() + "L");
-//        }
-//
-//        // Update liquid stock first
-//        item.setStockInLiters(newStockInLiters);
-//        item.setStockInMillilitres(newStockInLiters * 1000);
-//
-//        // Calculate new pack quantity based on remaining liquid stock
-//        // Full packs = floor(remaining liquid / pack size)
-//        int newPackQuantity = (int) Math.floor(newStockInLiters / packSizeInLiters);
-//
-//        // Validate we have enough packs for full pack sales
-//        if (quantity != null && quantity > 0 && item.getAvailableStock() < quantity) {
-//            throw new RuntimeException("Insufficient stock (packs) for item ID: " + item.getId() +
-//                    ". Required: " + quantity + ", Available: " + item.getAvailableStock());
-//        }
-//
-//        // Update pack quantity
-//        item.setAvailableStock(newPackQuantity);
-//    }
 
     private void restoreItemStock(Item item, Integer quantity, Double quantityLiters, Integer quantityMilliliters) {
         BigDecimal packSizeInLiters = BigDecimal.valueOf(getPackSizeInLiters(item));
@@ -289,33 +316,6 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         item.setAvailableStock(newPackQuantity);
     }
 
-    // Helper method to restore stock using liquid-based calculations
-//    private void restoreItemStock(Item item, Integer quantity, Double quantityLiters, Integer quantityMilliliters) {
-//        // Parse pack size to liters
-//        double packSizeInLiters = getPackSizeInLiters(item);
-//
-//        // Calculate total liters to restore
-//        double totalRestoreLiters = 0.0;
-//        if (quantity != null && quantity > 0) {
-//            totalRestoreLiters += quantity * packSizeInLiters;
-//        }
-//        if (quantityLiters != null) {
-//            totalRestoreLiters += quantityLiters;
-//        }
-//        if (quantityMilliliters != null) {
-//            totalRestoreLiters += quantityMilliliters / 1000.0;
-//        }
-//
-//        // Update liquid stock first
-//        double newStockInLiters = item.getStockInLiters() + totalRestoreLiters;
-//        item.setStockInLiters(newStockInLiters);
-//        item.setStockInMillilitres(newStockInLiters * 1000);
-//
-//        // Calculate new pack quantity based on total liquid stock
-//        // Full packs = floor(total liquid / pack size)
-//        int newPackQuantity = (int) Math.floor(newStockInLiters / packSizeInLiters);
-//        item.setAvailableStock(newPackQuantity);
-//    }
 
     // Helper method to get pack size in liters
     private double getPackSizeInLiters(Item item) {
