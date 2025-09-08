@@ -27,6 +27,9 @@ public class Sales_Order {
     @Column(name = "Created_At", nullable = false)
     private String createdAt;
 
+    @Column(name = "STATUS", nullable = true)
+    private Boolean status;
+
     @ManyToOne
     @JoinColumn(name = "CUSTOMER_ID")
     private Customer customer;

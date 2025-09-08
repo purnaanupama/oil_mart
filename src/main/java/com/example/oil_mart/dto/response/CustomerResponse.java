@@ -8,5 +8,5 @@ public class CustomerResponse {
     private String customerCode;
     private String customerName;
     private String customerPhone;
-    private String createdAt; // This should be formatted as needed, e.g., "yyyy-MM-dd HH:mm:ss"
+    private String createdAt;
 }

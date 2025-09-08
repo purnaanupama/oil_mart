@@ -59,7 +59,7 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
             salesOrder.setCustomer(customerRepository.findById(request.getCustomerId())
                     .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + request.getCustomerId())));
         } else {
-            salesOrder.setCustomer(null);
+            salesOrder.setCustomer(null); // No customer for CASH sales
         }
 
         salesOrder.setCreatedAt(request.getCreatedAt() != null ? request.getCreatedAt() : LocalDateTime.now().toString());
@@ -96,6 +96,7 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
                 orderItem.setQuantity(itemReq.getQuantity() != null ? itemReq.getQuantity() : 0);
                 orderItem.setQuantityLiters(itemReq.getQuantityLiters());
 
+                // Convert Integer to Integer for quantityMilliliters
                 if (itemReq.getQuantityMilliliters() != null) {
                     orderItem.setQuantityMilliliters(itemReq.getQuantityMilliliters());
                 } else {
@@ -124,7 +125,6 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
 
         // 4️⃣ Save total profit
         saveSalesProfit(salesOrder.getSalesOrderNo(), salesOrder.getSalesOrderType(), totalProfit);
-
 
         return buildSalesOrderResponse(salesOrder);
     }
@@ -199,6 +199,23 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
 
     @Override
     @Transactional
+    public SalesOrderResponse updateCreditPaymentStatus(Long id) {
+        Sales_Order salesOrder = salesOrderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sales order not found with ID: " + id));
+
+        // Check if the sales order is CREDIT and not already marked as paid
+        if ("CREDIT".equalsIgnoreCase(salesOrder.getSalesOrderType())
+                && (salesOrder.getStatus() == null || !salesOrder.getStatus())) {
+
+            salesOrder.setStatus(true); // Mark as paid
+            salesOrder = salesOrderRepository.save(salesOrder);
+        }
+
+        return buildSalesOrderResponse(salesOrder);
+    }
+
+    @Override
+    @Transactional
     public void deleteSalesOrderById(Long salesOrderId) {
         Sales_Order salesOrder = salesOrderRepository.findById(salesOrderId)
                 .orElseThrow(() -> new RuntimeException("Sales order not found with ID: " + salesOrderId));
@@ -207,16 +224,18 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         List<Sales_Order_Item> orderItems = salesOrderItemRepository.findAllBySalesOrder(salesOrder);
         for (Sales_Order_Item orderItem : orderItems) {
             Item item = orderItem.getItem();
-
-            // Restore stock using the same liquid-based logic
             restoreItemStock(item, orderItem.getQuantity(), orderItem.getQuantityLiters(),
                     orderItem.getQuantityMilliliters());
-
             itemRepository.save(item);
         }
 
-        // Delete order items first, then the order
+        // Delete order items first
         salesOrderItemRepository.deleteAll(orderItems);
+
+        // Delete profit record(s) linked to this sales order
+        salesProfitRepository.deleteBySalesOrderNo(salesOrder.getSalesOrderNo());
+
+        // Delete the order itself
         salesOrderRepository.delete(salesOrder);
     }
 
@@ -225,7 +244,6 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         Sales_Order lastOrder = salesOrderRepository.findTopByOrderByIdDesc();
         return lastOrder != null ? lastOrder.getSalesOrderNo() : "SAL-2025-001";
     }
-
 
     @Override
     @Transactional
@@ -242,7 +260,6 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
 
         Item item = orderItem.getItem();
 
-        // Restore stock
         restoreItemStock(item, orderItem.getQuantity(), orderItem.getQuantityLiters(),
                 orderItem.getQuantityMilliliters());
         itemRepository.save(item);
@@ -284,7 +301,6 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         item.setAvailableStock(newPackQuantity);
     }
 
-
     private void restoreItemStock(Item item, Integer quantity, Double quantityLiters, Integer quantityMilliliters) {
         BigDecimal packSizeInLiters = BigDecimal.valueOf(getPackSizeInLiters(item));
         BigDecimal stockInLiters = BigDecimal.valueOf(item.getStockInLiters());
@@ -316,7 +332,6 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         item.setAvailableStock(newPackQuantity);
     }
 
-
     // Helper method to get pack size in liters
     private double getPackSizeInLiters(Item item) {
         try {
@@ -342,6 +357,7 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         response.setCustomerId(salesOrder.getCustomer() != null ? salesOrder.getCustomer().getId() : null);
         response.setCreatedAt(salesOrder.getCreatedAt());
         response.setNote(salesOrder.getNote());
+        response.setStatus(salesOrder.getStatus());
 
         List<SalesOrderItemResponse> itemResponses = salesOrderItemRepository.findAllBySalesOrder(salesOrder)
                 .stream()

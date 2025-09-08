@@ -22,6 +22,11 @@ public class SalesOrderController {
         return salesOrderService.saveSalesOrder(request);
     }
 
+    @PutMapping("/credit-payment-status/{id}")
+    public SalesOrderResponse updateCreditPaymentStatus(@PathVariable Long id) {
+        return salesOrderService.updateCreditPaymentStatus(id);
+    }
+
     @GetMapping
     public List<SalesOrderResponse> getSalesOrders() {
         return salesOrderService.getSalesOrders();

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            margin: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .report-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+
+        .report-info p {
+            margin: 5px 0;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        th, td {
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #34495e;
+            color: white;
+            font-weight: bold;
+        }
+
+        .order-header {
+            background-color: #ecf0f1;
+            font-weight: bold;
+        }
+
+        .items-header {
+            background-color: #d5dbdb;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .item-row {
+            background-color: #f8f9fa;
+        }
+
+        .total-row {
+            background-color: #e8f5e8;
+            font-weight: bold;
+        }
+
+        .profit-row {
+            background-color: #fff3cd;
+            font-weight: bold;
+        }
+
+        .grand-totals {
+            background-color: #d4edda;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 30px;
+        }
+
+        .grand-totals h3 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+
+        .grand-totals p {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>Sales Order Report</h1>
+</div>
+
+<div class="report-info">
+    <p>Generated Date: [[${generatedDate}]]</p>
+    <p>Generated Time: [[${generatedTime}]]</p>
+    <p>Date Range: [[${startDate}]] to [[${endDate}]]</p>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Order No</th>
+        <th>Order Type</th>
+        <th>Note</th>
+        <th>Customer</th>
+        <th>Status</th>
+        <th colspan="2">Details</th>
+    </tr>
+    </thead>
+    <tbody>
+    <th:block th:each="orderData : ${ordersData}">
+        <!-- Sales Order Header -->
+        <tr>
+            <td class="order-header" th:text="${orderData.order.salesOrderNo}"></td>
+            <td class="order-header" th:text="${orderData.order.salesOrderType}"></td>
+            <td class="order-header" th:text="${orderData.order.note ?: 'N/A'}"></td>
+            <td class="order-header" th:text="${orderData.order.customer?.customer_code  ?: 'N/A'}"></td>
+            <td class="order-header" th:text="${orderData.order.status == true ? 'PAID' : (orderData.order.status == false ? 'PENDING_PAYMENT' : '')}"></td>
+            <td class="order-header" colspan="2" th:text="'Order Date: ' + ${orderData.orderDate}"></td>
+        </tr>
+
+        <!-- Items Header -->
+        <tr>
+            <td class="items-header" colspan="7">Items</td>
+        </tr>
+
+        <!-- Items Sub-header -->
+        <tr>
+            <th>Item Code</th>
+            <th>Item Brand</th>
+            <th>Quantity</th>
+            <th>Quantity (ML)</th>
+            <th>Is Loose</th>
+            <th>Unit Price (Rs.)</th>
+            <th>Total Amount (Rs.)</th>
+        </tr>
+
+        <!-- Items Data -->
+        <tr class="item-row" th:each="item : ${orderData.items}">
+            <td th:text="${item.item.itemCode}"></td>
+            <td th:text="${item.item.itemBrand?.brandName ?: 'N/A'}"></td>
+            <td class="text-center" th:text="${item.quantity ?: 0}"></td>
+            <td class="text-center" th:text="${item.quantityMilliliters ?: 0}"></td>
+            <td class="text-center" th:text="${item.isLoose == true ? 'Yes' : 'No'}"></td>
+            <td class="text-right" th:text="${#numbers.formatDecimal(item.soItemUnitPrice, 1, 2)}"></td>
+            <td class="text-right" th:text="${#numbers.formatDecimal(item.soItemTotalAmount, 1, 2)}"></td>
+        </tr>
+
+        <!-- Grand Total Row -->
+        <tr class="total-row">
+            <td colspan="5"></td>
+            <td class="text-right"><strong>Grand Total:</strong></td>
+            <td class="text-right"><strong>Rs. [[${#numbers.formatDecimal(orderData.order.totalAmount, 1, 2)}]]</strong></td>
+        </tr>
+
+        <!-- Order Profit Row -->
+        <tr class="profit-row">
+            <td colspan="5"></td>
+            <td class="text-right"><strong>Order Profit:</strong></td>
+            <td class="text-right"><strong>Rs. [[${#numbers.formatDecimal(orderData.profit?.totalProfitAmount ?: 0, 1, 2)}]]</strong></td>
+        </tr>
+
+        <!-- Spacer row for better separation -->
+        <tr style="height: 20px;">
+            <td colspan="7" style="border: none;"></td>
+        </tr>
+    </th:block>
+    </tbody>
+</table>
+
+<div class="grand-totals">
+    <h3>Report Summary</h3>
+    <p>Total Sales Amount: Rs. [[${#numbers.formatDecimal(totalSalesAmount, 1, 2)}]]</p>
+    <p>Total Profit Amount: Rs. [[${#numbers.formatDecimal(totalProfitAmount, 1, 2)}]]</p>
+    <p>Number of Orders: [[${totalOrders}]]</p>
+</div>
+</body>
+</html>

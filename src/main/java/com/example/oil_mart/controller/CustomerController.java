@@ -3,6 +3,7 @@ package com.example.oil_mart.controller;
 import com.example.oil_mart.dto.request.CustomerSaveRequest;
 import com.example.oil_mart.dto.request.CustomerUpdateRequest;
 import com.example.oil_mart.dto.response.CustomerResponse;
+import com.example.oil_mart.dto.response.SalesOrderResponse;
 import com.example.oil_mart.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,16 @@ public class CustomerController {
             return ResponseEntity.ok(getAllResponse);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @GetMapping("credit-orders/{customerId}")
+    public ResponseEntity<List<SalesOrderResponse>> getCustomerCreditOrders(@PathVariable("customerId") Long customerId) {
+        try {
+            List<SalesOrderResponse> creditOrders = customerService.getCustomerCreditOrders(customerId);
+            return ResponseEntity.ok(creditOrders);
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching credit orders for customer ID " + customerId, e);
         }
     }
 

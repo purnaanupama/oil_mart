@@ -12,5 +12,6 @@ public class SalesOrderResponse {
     private Long customerId;
     private String note;
     private String createdAt;
+    private Boolean status;
     private List<SalesOrderItemResponse> items;
 }

@@ -23,5 +23,4 @@ public class SalesProfit{
 
     @Column(name = "Created_At", nullable = false)
     private String createdAt;
-
 }
