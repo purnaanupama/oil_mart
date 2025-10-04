@@ -56,6 +56,7 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
 
         // Set customer only for CREDIT sales
         if ("CREDIT".equalsIgnoreCase(request.getSalesOrderType()) && request.getCustomerId() != null) {
+            salesOrder.setStatus(Boolean.FALSE);
             salesOrder.setCustomer(customerRepository.findById(request.getCustomerId())
                     .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + request.getCustomerId())));
         } else {
@@ -203,11 +204,16 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         Sales_Order salesOrder = salesOrderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sales order not found with ID: " + id));
 
-        // Check if the sales order is CREDIT and not already marked as paid
-        if ("CREDIT".equalsIgnoreCase(salesOrder.getSalesOrderType())
-                && (salesOrder.getStatus() == null || !salesOrder.getStatus())) {
+        // Only toggle status for CREDIT sales orders
+        if ("CREDIT".equalsIgnoreCase(salesOrder.getSalesOrderType())) {
+            // Toggle the status: null/false -> true, true -> false
+            Boolean currentStatus = salesOrder.getStatus();
+            if (currentStatus == null || !currentStatus) {
+                salesOrder.setStatus(true);  // Mark as paid
+            } else {
+                salesOrder.setStatus(false); // Mark as unpaid
+            }
 
-            salesOrder.setStatus(true); // Mark as paid
             salesOrder = salesOrderRepository.save(salesOrder);
         }
 

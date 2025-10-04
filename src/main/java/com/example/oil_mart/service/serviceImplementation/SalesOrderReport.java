@@ -61,7 +61,7 @@ public class SalesOrderReport {
         public void setOrderDate(String orderDate) { this.orderDate = orderDate; }
     }
 
-    public String generateSalesOrderReportBase64(String startDate, String endDate) throws Exception {
+    public String generateSalesOrderReportBase64(String startDate, String endDate, Double expenses) throws Exception {
         // Parse input dates
         SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date start = inputFormat.parse(startDate);
@@ -86,21 +86,27 @@ public class SalesOrderReport {
         List<OrderData> ordersData = new ArrayList<>();
         double totalSalesAmount = 0.0;
         double totalProfitAmount = 0.0;
+        double pendingCreditAmount = 0.0;
+        double totalExpenses = 0.0;
 
         for (Sales_Order order : orders) {
             List<Sales_Order_Item> items = salesOrderItemRepository.findAllBySalesOrder(order);
             SalesProfit profit = salesProfitRepository.findBySalesOrderNo(order.getSalesOrderNo()).orElse(null);
 
             String orderDate = extractDateFromISO(order.getCreatedAt());
-
+            if(Boolean.FALSE.equals(order.getStatus())){
+                pendingCreditAmount = pendingCreditAmount + order.getTotalAmount();
+            }
             ordersData.add(new OrderData(order, items, profit, orderDate));
 
             totalSalesAmount += order.getTotalAmount();
-            if (profit != null) {
+            if (profit != null && !Boolean.FALSE.equals(order.getStatus())) {
                 totalProfitAmount += profit.getTotalProfitAmount();
             }
         }
 
+        totalProfitAmount = totalProfitAmount - expenses;
+        totalExpenses = totalExpenses + expenses;
         // Prepare template data
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -110,6 +116,8 @@ public class SalesOrderReport {
                 "ordersData", ordersData,
                 "totalSalesAmount", totalSalesAmount,
                 "totalProfitAmount", totalProfitAmount,
+                "totalPendingCredit", pendingCreditAmount,
+                "totalOtherExpenses", totalExpenses,
                 "totalOrders", orders.size(),
                 "generatedDate", now.format(dateFormatter),
                 "generatedTime", now.format(timeFormatter),

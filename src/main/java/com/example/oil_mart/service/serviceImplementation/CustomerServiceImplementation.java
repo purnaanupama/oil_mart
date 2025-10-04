@@ -52,26 +52,35 @@ public class CustomerServiceImplementation implements CustomerService {
                 .map(this::returnResponse)
                 .orElse(null);
     }
+
+    // 3. Modified CustomerService Implementation
     @Override
-    public List<SalesOrderResponse> getCustomerCreditOrders(Long id) {
-        Customer customer = customerRepository.findById(id)
+    public List<SalesOrderResponse> getCustomerCreditOrders(Long customerId, String searchText) {
+        Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        // Fetch all orders of this customer
-        List<Sales_Order> orders = salesOrderRepository.findByCustomer(customer);
+        // Fetch all credit orders of this customer
+        List<Sales_Order> orders;
 
-        // Filter only CREDIT orders
+        if (searchText != null && !searchText.trim().isEmpty()) {
+            // Use search query when searchText is provided
+            orders = salesOrderRepository.findByCreditOrdersWithSearch(customer, searchText.trim());
+        } else {
+            // Get all credit orders when no search text
+            orders = salesOrderRepository.findByCustomerAndSalesOrderType(customer, "CREDIT");
+        }
+
+        // Convert to response DTOs
         return orders.stream()
-                .filter(order -> "CREDIT".equalsIgnoreCase(order.getSalesOrderType()))
                 .map(order -> {
                     SalesOrderResponse response = new SalesOrderResponse();
                     response.setId(order.getId());
-                    response.setSalesOrderNo(order.getSalesOrderNo()); // use correct field
+                    response.setSalesOrderNo(order.getSalesOrderNo());
                     response.setCreatedAt(order.getCreatedAt());
                     response.setTotalAmount(order.getTotalAmount());
                     response.setStatus(order.getStatus());
                     response.setNote(order.getNote());
-                    response.setSalesOrderType(order.getSalesOrderType()); // CREDIT / CASH
+                    response.setSalesOrderType(order.getSalesOrderType());
                     response.setCustomerId(customer.getId());
                     return response;
                 })

@@ -24,24 +24,12 @@ public class ReportController {
     // New endpoint for sales order report with date range
     @GetMapping("/sales-orders")
     public Map<String, String> getSalesOrderReport(
+            @RequestParam("expenses") Double expenses,
             @RequestParam("startDate") String startDate,
             @RequestParam("endDate") String endDate) throws Exception {
 
-        String base64Pdf = salesOrderReport.generateSalesOrderReportBase64(startDate, endDate);
+        String base64Pdf = salesOrderReport.generateSalesOrderReportBase64(startDate, endDate, expenses);
         return Map.of("pdfBase64", base64Pdf);
     }
 
-    // Alternative POST endpoint for more complex parameters
-    @PostMapping("/sales-orders")
-    public Map<String, String> getSalesOrderReportPost(@RequestBody Map<String, String> dateRange) throws Exception {
-        String startDate = dateRange.get("startDate");
-        String endDate = dateRange.get("endDate");
-
-        if (startDate == null || endDate == null) {
-            throw new IllegalArgumentException("Both startDate and endDate are required");
-        }
-
-        String base64Pdf = salesOrderReport.generateSalesOrderReportBase64(startDate, endDate);
-        return Map.of("pdfBase64", base64Pdf);
-    }
 }

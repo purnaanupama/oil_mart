@@ -1,25 +1,33 @@
 package com.example.oil_mart.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
-@Data
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "SUPPLIER")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Supplier {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "CUSTOMER_CODE", unique = true, nullable = false, length = 40)
-    private  String customer_code;
+    @Column(nullable = false)
+    private String supplierName;
 
-    @Column(name = "CUSTOMER_NAME", nullable = false, length = 100)
-    private String customer_name;
+    @Column
+    private String supplierPhone;
 
-    @Column(name = "CUSTOMER_PHONE", length = 15)
-    private String customer_phone;
+    @Column
+    private String supplierAddress;
 
-    @Column(name = "Created_At", nullable = false)
-    private String createdAt;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 }

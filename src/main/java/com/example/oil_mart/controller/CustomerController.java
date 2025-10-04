@@ -38,10 +38,13 @@ public class CustomerController {
         }
     }
 
+
     @GetMapping("credit-orders/{customerId}")
-    public ResponseEntity<List<SalesOrderResponse>> getCustomerCreditOrders(@PathVariable("customerId") Long customerId) {
+    public ResponseEntity<List<SalesOrderResponse>> getCustomerCreditOrders(
+            @PathVariable("customerId") Long customerId,
+            @RequestParam(value = "searchText", required = false) String searchText) {
         try {
-            List<SalesOrderResponse> creditOrders = customerService.getCustomerCreditOrders(customerId);
+            List<SalesOrderResponse> creditOrders = customerService.getCustomerCreditOrders(customerId, searchText);
             return ResponseEntity.ok(creditOrders);
         } catch (Exception e) {
             throw new RuntimeException("Error fetching credit orders for customer ID " + customerId, e);
