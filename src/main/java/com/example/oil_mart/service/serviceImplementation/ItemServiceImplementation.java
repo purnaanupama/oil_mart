@@ -5,18 +5,23 @@ import com.example.oil_mart.dto.request.ItemUpdateRequest;
 import com.example.oil_mart.dto.response.BrandResponse;
 import com.example.oil_mart.dto.response.CategoryResponse;
 import com.example.oil_mart.dto.response.ItemResponse;
+import com.example.oil_mart.dto.response.PageResponse;
 import com.example.oil_mart.enums.Status;
 import com.example.oil_mart.model.Brand;
 import com.example.oil_mart.model.Category;
+import com.example.oil_mart.model.GrnItem;
 import com.example.oil_mart.model.Item;
 import com.example.oil_mart.repository.BrandRepository;
 import com.example.oil_mart.repository.CategoryRepository;
+import com.example.oil_mart.repository.GRNItemRepository;
 import com.example.oil_mart.repository.ItemRepository;
 import com.example.oil_mart.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,18 +29,25 @@ public class ItemServiceImplementation implements ItemService {
 
     @Autowired
     private ItemRepository itemRepository;
-
     @Autowired
     private BrandRepository brandRepository;
-
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired
+    private GRNItemRepository grnItemRepository;
 
     @Override
     public ItemResponse save(ItemSaveRequest saveRequest) {
         try {
-            Item item = new Item();
+            // Check if item already exists
+            Optional<Item> existingItem = itemRepository.findByItemCodeAndItemBrand_Id(
+                    saveRequest.getItemCode(), saveRequest.getItemBrand()
+            );
 
+            if (existingItem.isPresent()) { throw new RuntimeException("Item already exists with this code and brand.");}
+
+            // Create new item
+            Item item = new Item();
             item.setItemCode(saveRequest.getItemCode());
             item.setItemDescription(saveRequest.getItemDescription());
             item.setPackSize(saveRequest.getPackSize());
@@ -43,18 +55,47 @@ public class ItemServiceImplementation implements ItemService {
             item.setWholesalePrice(saveRequest.getWholesalePrice());
             item.setRetailPrice(saveRequest.getRetailPrice());
             item.setItemBrand(brandRepository.getReferenceById(saveRequest.getItemBrand()));
-            item.setItemCategory(categoryRepository.getReferenceById(saveRequest.getItemCategory()));
             item.setCreatedBy(saveRequest.getCreatedBy());
             item.setModifiedBy(saveRequest.getCreatedBy());
             item.setStatus(Status.ACTIVE);
 
             Item saveResponse = itemRepository.save(item);
-
             return returnResponse(saveResponse);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public PageResponse<ItemResponse> getAll(int page, int size, String sortBy, String sortDir) {
+        try {
+            // Spring Data uses 0-based; we convert 1-based -> 0-based
+            int pageIndex = Math.max(page - 1, 0);
+            Sort sort = "ASC".equalsIgnoreCase(sortDir)
+                    ? Sort.by(sortBy).ascending()
+                    : Sort.by(sortBy).descending();
+
+            Pageable pageable = PageRequest.of(pageIndex, size, sort);
+            Page<Item> pageData = itemRepository.findAll(pageable);
+
+            var content = pageData.getContent()
+                    .stream()
+                    .map(ItemServiceImplementation::returnResponse)
+                    .collect(Collectors.toList());
+
+            return new PageResponse<>(
+                    content,
+                    pageIndex + 1,                 // back to 1-based
+                    size,
+                    pageData.getTotalElements(),
+                    pageData.getTotalPages(),
+                    pageData.isLast()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     @Override
     public List<ItemResponse> getAll() {
@@ -89,10 +130,8 @@ public class ItemServiceImplementation implements ItemService {
                 item.setWholesalePrice(updateRequest.getWholesalePrice());
                 item.setRetailPrice(updateRequest.getRetailPrice());
                 item.setItemBrand(brandRepository.getReferenceById(updateRequest.getItemBrand()));
-                item.setItemCategory(categoryRepository.getReferenceById(updateRequest.getItemCategory()));
                 item.setStatus(updateRequest.getStatus());
                 item.setModifiedBy(updateRequest.getModifiedBy());
-
                 updateResponse = itemRepository.save(item);
             }
 
@@ -102,9 +141,40 @@ public class ItemServiceImplementation implements ItemService {
         }
     }
 
+    @Override
+    public ItemResponse deleteById(Integer id) {
+
+            List<GrnItem> grnItems = grnItemRepository.findByItemIdIn(List.of(Long.valueOf(id)));
+
+            if (grnItems != null && !grnItems.isEmpty()) {
+                throw new RuntimeException("This item has associated GRN: " + id);
+            }
+
+            Item item = itemRepository.findById(id).orElse(null);
+            if (item == null) {
+                throw new RuntimeException("Item not found with ID: " + id);
+            }
+            itemRepository.delete(item);
+            return returnResponse(item);
+    }
+
+    @Override
+    public List<ItemResponse> getAllByNotEmptyQuatity() {
+        try {
+            //check if the item has available stock greater than 0
+            return itemRepository.findAll().stream()
+                    .filter(item -> item.getAvailableStock() > 0)
+                    .map(ItemServiceImplementation::returnResponse)
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     private static ItemResponse returnResponse(Item item) {
         ItemResponse response = new ItemResponse();
-
         response.setId(item.getId());
         response.setItemCode(item.getItemCode());
         response.setItemDescription(item.getItemDescription());
@@ -113,12 +183,14 @@ public class ItemServiceImplementation implements ItemService {
         response.setWholesalePrice(item.getWholesalePrice());
         response.setRetailPrice(item.getRetailPrice());
         response.setItemBrand(brandConversion(item.getItemBrand()));
-        response.setItemCategory(categoryConversion(item.getItemCategory()));
         response.setStatus(item.getStatus());
         response.setCreatedBy(item.getCreatedBy());
         response.setCreatedDateTime(item.getCreatedDateTime());
         response.setModifiedBy(item.getModifiedBy());
         response.setModifiedDateTime(item.getModifiedDateTime());
+        response.setAvailableStock(item.getAvailableStock());
+        response.setStockInLiters(item.getStockInLiters());
+        response.setStockInMillilitres(item.getStockInMillilitres());
 
         return response;
     }
@@ -128,11 +200,6 @@ public class ItemServiceImplementation implements ItemService {
 
         brandResponse.setId(brand.getId());
         brandResponse.setBrandName(brand.getBrandName());
-        brandResponse.setCreatedBy(brand.getCreatedBy());
-        brandResponse.setCreatedDateTime(brand.getCreatedDateTime());
-        brandResponse.setModifiedBy(brand.getModifiedBy());
-        brandResponse.setModifiedDateTime(brand.getModifiedDateTime());
-        brandResponse.setStatus(brand.getStatus());
 
         return brandResponse;
     }
@@ -150,4 +217,6 @@ public class ItemServiceImplementation implements ItemService {
 
         return categoryResponse;
     }
+
+
 }

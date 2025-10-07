@@ -22,9 +22,13 @@ public class ItemResponse {
 
     private double retailPrice;
 
-    private BrandResponse itemBrand;
+    private double availableStock;
 
-    private CategoryResponse itemCategory;
+    private double stockInLiters;
+
+    private double stockInMillilitres;
+
+    private BrandResponse itemBrand;
 
     private Status status;
 

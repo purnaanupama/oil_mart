@@ -5,7 +5,9 @@ import com.example.oil_mart.dto.request.BrandUpdateRequest;
 import com.example.oil_mart.dto.response.BrandResponse;
 import com.example.oil_mart.enums.Status;
 import com.example.oil_mart.model.Brand;
+import com.example.oil_mart.model.Item;
 import com.example.oil_mart.repository.BrandRepository;
+import com.example.oil_mart.repository.ItemRepository;
 import com.example.oil_mart.service.BrandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,75 +20,78 @@ public class BrandServiceImplementation implements BrandService {
 
     @Autowired
     private BrandRepository brandRepository;
-
+    @Autowired
+    private ItemRepository itemRepository;
     @Override
     public BrandResponse save(BrandSaveRequest saveRequest) {
         try {
             Brand brand = new Brand();
-
             brand.setBrandName(saveRequest.getBrandName());
             brand.setCreatedBy(saveRequest.getCreatedBy());
-            brand.setModifiedBy(saveRequest.getCreatedBy());
             brand.setStatus(Status.ACTIVE);
 
-            Brand saveResponse = brandRepository.save(brand);
-
-            return returnResponse(saveResponse);
+            Brand savedBrand = brandRepository.save(brand);
+            return returnResponse(savedBrand);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error saving brand", e);
         }
     }
 
     @Override
     public List<BrandResponse> getAll() {
-        try {
-            return brandRepository.findAll().stream().map(BrandServiceImplementation::returnResponse).collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return brandRepository.findAll()
+                .stream()
+                .map(BrandServiceImplementation::returnResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
     public BrandResponse getById(Integer id) {
-        try {
-            return brandRepository.findById(id).map(BrandServiceImplementation::returnResponse).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return brandRepository.findById(id)
+                .map(BrandServiceImplementation::returnResponse)
+                .orElse(null);
     }
 
     @Override
     public BrandResponse update(BrandUpdateRequest updateRequest) {
+        Brand brand = brandRepository.findById(updateRequest.getId())
+                .orElseThrow(() -> new RuntimeException("Brand not found"));
+
+        brand.setBrandName(updateRequest.getBrandName());
+        brand.setModifiedBy(updateRequest.getModifiedBy());
+        brand.setStatus(updateRequest.getStatus());
+
+        Brand updated = brandRepository.save(brand);
+        return returnResponse(updated);
+    }
+
+    @Override
+    public BrandResponse deleteById(Integer id) {
         try {
-            Brand updateResponse = new Brand();
+            Brand brand = brandRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Brand not found with ID: " + id));
 
-            Brand brand = brandRepository.getById(updateRequest.getId());
-
-            if (brand != null) {
-                brand.setBrandName(updateRequest.getBrandName());
-                brand.setStatus(updateRequest.getStatus());
-                brand.setModifiedBy(updateRequest.getModifiedBy());
-
-                updateResponse = brandRepository.save(brand);
+            // Check if any items are using this brand
+            List<Item> itemsUsingBrand = itemRepository.findByItemBrand_Id(id);
+            if (!itemsUsingBrand.isEmpty()) {
+                throw new RuntimeException("Cannot delete brand. It is currently in use by existing items.");
             }
 
-            return returnResponse(updateResponse);
+            brandRepository.delete(brand);
+            return returnResponse(brand);
+
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error deleting brand: " + e.getMessage(), e);
         }
     }
 
+
     private static BrandResponse returnResponse(Brand brand) {
         BrandResponse response = new BrandResponse();
-
         response.setId(brand.getId());
         response.setBrandName(brand.getBrandName());
         response.setCreatedBy(brand.getCreatedBy());
         response.setCreatedDateTime(brand.getCreatedDateTime());
-        response.setModifiedBy(brand.getModifiedBy());
-        response.setModifiedDateTime(brand.getModifiedDateTime());
-        response.setStatus(brand.getStatus());
-
         return response;
     }
 }

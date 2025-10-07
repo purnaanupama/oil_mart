@@ -5,6 +5,7 @@ import com.example.oil_mart.dto.request.BrandUpdateRequest;
 import com.example.oil_mart.dto.response.BrandResponse;
 import com.example.oil_mart.service.BrandService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,12 +17,10 @@ public class BrandController {
 
     @Autowired
     private BrandService brandService;
-
     @PostMapping()
     public ResponseEntity<BrandResponse> saveBrand(@RequestBody BrandSaveRequest saveRequest) {
         try {
             BrandResponse saveResponse = brandService.save(saveRequest);
-
             return ResponseEntity.ok(saveResponse);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -60,5 +59,23 @@ public class BrandController {
             throw new RuntimeException(e);
         }
     }
+
+    @DeleteMapping("{brandId}")
+    public ResponseEntity<?> deleteBrand(@PathVariable("brandId") Integer brandId) {
+        try {
+            BrandResponse deletedBrand = brandService.deleteById(brandId);
+
+            if (deletedBrand != null) {
+                return ResponseEntity.ok(deletedBrand);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+
 
 }

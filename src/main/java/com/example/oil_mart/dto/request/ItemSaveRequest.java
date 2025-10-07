@@ -9,18 +9,17 @@ public class ItemSaveRequest {
 
     private String itemDescription;
 
-    private String packSize;
-
-    private String packUnit;
-
     private double wholesalePrice;
 
     private double retailPrice;
 
+    private String packSize;
+
+    private String packUnit;
+
+    private double availableStock;
+
     private Integer itemBrand;
 
-    private Integer itemCategory;
-
     private String createdBy;
-
 }
