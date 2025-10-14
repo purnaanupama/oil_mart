@@ -8,6 +8,7 @@ import java.util.List;
 public class SalesOrderSaveRequest {
     private String salesOrderNo;
     private String salesOrderType;
+    private String receiptNo;
     private Double totalAmount;
     private Long customerId;
     private String note;

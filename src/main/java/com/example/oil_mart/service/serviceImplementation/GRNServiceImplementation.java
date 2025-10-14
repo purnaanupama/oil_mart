@@ -4,6 +4,8 @@ import com.example.oil_mart.dto.request.GRNSaveRequest;
 import com.example.oil_mart.dto.request.GRNItemSaveRequest;
 import com.example.oil_mart.dto.response.GRNResponse;
 import com.example.oil_mart.dto.response.GRNItemResponse;
+import com.example.oil_mart.dto.response.ItemResponse;
+import com.example.oil_mart.dto.response.PageResponse;
 import com.example.oil_mart.model.Grn;
 import com.example.oil_mart.model.GrnItem;
 import com.example.oil_mart.model.Item;
@@ -11,6 +13,10 @@ import com.example.oil_mart.repository.GRNRepository;
 import com.example.oil_mart.repository.ItemRepository;
 import com.example.oil_mart.service.GRNService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -180,5 +186,38 @@ public class GRNServiceImplementation implements GRNService {
         List<Grn> grns = grnRepository.findAll();
         return grns.stream().map(this::convertToResponse).collect(Collectors.toList());
     }
+
+    @Override
+    public PageResponse<GRNResponse> getAll(int page, int size, String sortBy, String sortDir) {
+        try {
+            // Spring Data uses 0-based; we convert 1-based -> 0-based
+            int pageIndex = Math.max(page - 1, 0);
+            Sort sort = "ASC".equalsIgnoreCase(sortDir)
+                    ? Sort.by(sortBy).ascending()
+                    : Sort.by(sortBy).descending();
+
+            Pageable pageable = PageRequest.of(pageIndex, size, sort);
+            Page<Grn> pageData = grnRepository.findAll(pageable);
+
+            // Convert Grn entities to GRNResponse DTOs
+            List<GRNResponse> content = pageData.getContent()
+                    .stream()
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+
+            return new PageResponse<>(
+                    content,
+                    pageIndex + 1,                 // back to 1-based
+                    size,
+                    pageData.getTotalElements(),
+                    pageData.getTotalPages(),
+                    pageData.isLast()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching paginated GRNs: " + e.getMessage(), e);
+        }
+    }
+
+   
 
 }

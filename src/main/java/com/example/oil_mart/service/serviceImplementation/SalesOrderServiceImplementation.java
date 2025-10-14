@@ -52,6 +52,7 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         Sales_Order salesOrder = new Sales_Order();
         salesOrder.setSalesOrderNo(request.getSalesOrderNo());
         salesOrder.setSalesOrderType(request.getSalesOrderType());
+        salesOrder.setReceiptNo(request.getReceiptNo());
         salesOrder.setTotalAmount(request.getTotalAmount());
 
         // Set customer only for CREDIT sales
@@ -358,6 +359,7 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         SalesOrderResponse response = new SalesOrderResponse();
         response.setId(salesOrder.getId());
         response.setSalesOrderNo(salesOrder.getSalesOrderNo());
+        response.setReceiptNo(salesOrder.getReceiptNo());
         response.setSalesOrderType(salesOrder.getSalesOrderType());
         response.setTotalAmount(salesOrder.getTotalAmount());
         response.setCustomerId(salesOrder.getCustomer() != null ? salesOrder.getCustomer().getId() : null);

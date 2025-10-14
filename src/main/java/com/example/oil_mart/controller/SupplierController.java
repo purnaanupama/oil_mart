@@ -17,7 +17,7 @@ public class SupplierController {
     private final SupplierService supplierService;
 
     @PostMapping
-    public SupplierResponse create(@RequestBody SupplierSaveRequest saveRequest) {
+    public SupplierResponse createSupplier(@RequestBody SupplierSaveRequest saveRequest) {
         return supplierService.save(saveRequest);
     }
 

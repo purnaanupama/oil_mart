@@ -40,6 +40,13 @@ public class SupplierItemServiceImplementation implements SupplierItemService {
         Item item = itemRepository.findById(request.getItemId())
                 .orElseThrow(() -> new RuntimeException("Item not found"));
 
+        // ADD THIS CHECK
+        if (supplierItemRepository.findBySupplier_IdAndItem_Id(
+                request.getSupplierId(),
+                request.getItemId().intValue()).isPresent()) {
+            throw new RuntimeException("This item is already assigned to this supplier");
+        }
+
         SupplierItem supplierItem = new SupplierItem();
         supplierItem.setSupplier(supplier);
         supplierItem.setItem(item);
