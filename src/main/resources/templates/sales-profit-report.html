@@ -93,8 +93,62 @@
             margin: 8px 0;
         }
 
+        .expenses-section {
+            background-color: #fff3e0;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .expenses-section h3 {
+            color: #e65100;
+            margin-bottom: 15px;
+        }
+
+        .expenses-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .expenses-table th {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .expenses-table td {
+            background-color: #fff8e1;
+        }
+
+        .profit-comparison {
+            background-color: #e1f5fe;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .profit-comparison h3 {
+            color: #01579b;
+            margin-bottom: 15px;
+        }
+
+        .profit-comparison p {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
         .text-center { text-align: center; }
         .text-right { text-align: right; }
+
+        .highlight-positive {
+            color: #2e7d32;
+        }
+
+        .highlight-negative {
+            color: #c62828;
+        }
     </style>
 </head>
 <body>
@@ -121,7 +175,6 @@
     </thead>
     <tbody>
     <th:block th:each="orderData : ${ordersData}">
-        <!-- Sales Order Header -->
         <tr>
             <td class="order-header" th:text="${orderData.order.salesOrderNo}"></td>
             <td class="order-header" th:text="${orderData.order.salesOrderType}"></td>
@@ -131,12 +184,10 @@
             <td class="order-header" colspan="2" th:text="'Order Date: ' + ${orderData.orderDate}"></td>
         </tr>
 
-        <!-- Items Header -->
         <tr>
             <td class="items-header" colspan="7">Items</td>
         </tr>
 
-        <!-- Items Sub-header -->
         <tr>
             <th>Item Code</th>
             <th>Item Brand</th>
@@ -147,7 +198,6 @@
             <th>Total Amount (Rs.)</th>
         </tr>
 
-        <!-- Items Data -->
         <tr class="item-row" th:each="item : ${orderData.items}">
             <td th:text="${item.item.itemCode}"></td>
             <td th:text="${item.item.itemBrand?.brandName ?: 'N/A'}"></td>
@@ -158,21 +208,18 @@
             <td class="text-right" th:text="${#numbers.formatDecimal(item.soItemTotalAmount, 1, 2)}"></td>
         </tr>
 
-        <!-- Grand Total Row -->
         <tr class="total-row">
             <td colspan="5"></td>
             <td class="text-right"><strong>Grand Total:</strong></td>
             <td class="text-right"><strong>Rs. [[${#numbers.formatDecimal(orderData.order.totalAmount, 1, 2)}]]</strong></td>
         </tr>
 
-        <!-- Order Profit Row -->
         <tr class="profit-row">
             <td colspan="5"></td>
             <td class="text-right"><strong>Order Profit:</strong></td>
             <td class="text-right"><strong>Rs. [[${#numbers.formatDecimal(orderData.profit?.totalProfitAmount ?: 0, 1, 2)}]]</strong></td>
         </tr>
 
-        <!-- Spacer row for better separation -->
         <tr style="height: 20px;">
             <td colspan="7" style="border: none;"></td>
         </tr>
@@ -180,12 +227,44 @@
     </tbody>
 </table>
 
+<!-- Expenses Breakdown Section -->
+<div class="expenses-section" th:if="${expenseSummaryList != null and !expenseSummaryList.isEmpty()}">
+    <h3>Expenses Breakdown (Date Range)</h3>
+    <table class="expenses-table">
+        <thead>
+        <tr>
+            <th>Expense Type</th>
+            <th class="text-center">Occurrences</th>
+            <th class="text-right">Total Amount (Rs.)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="expense : ${expenseSummaryList}">
+            <td th:text="${expense.expenseType}"></td>
+            <td class="text-center" th:text="${expense.occurrences}"></td>
+            <td class="text-right" th:text="${#numbers.formatDecimal(expense.totalAmount, 1, 2)}"></td>
+        </tr>
+        <tr class="total-row">
+            <td colspan="2" class="text-right"><strong>Total Expenses:</strong></td>
+            <td class="text-right"><strong>Rs. [[${#numbers.formatDecimal(totalExpenses, 1, 2)}]]</strong></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Profit Comparison Section -->
+<div class="profit-comparison">
+    <h3>Profit Analysis</h3>
+    <p>Profit Before Expenses: <span class="highlight-positive">Rs. [[${#numbers.formatDecimal(profitBeforeExpenses, 1, 2)}]]</span></p>
+    <p>Total Expenses Deducted: <span class="highlight-negative">Rs. [[${#numbers.formatDecimal(totalExpenses, 1, 2)}]]</span></p>
+    <p>Net Profit After Expenses: <span th:class="${profitAfterExpenses >= 0 ? 'highlight-positive' : 'highlight-negative'}">Rs. [[${#numbers.formatDecimal(profitAfterExpenses, 1, 2)}]]</span></p>
+</div>
+
+<!-- Grand Totals Summary -->
 <div class="grand-totals">
     <h3>Report Summary</h3>
     <p>Total Sales Amount: Rs. [[${#numbers.formatDecimal(totalSalesAmount, 1, 2)}]]</p>
     <p>Total Pending Payment Amount (CREDIT): Rs. [[${#numbers.formatDecimal(totalPendingCredit, 1, 2)}]]</p>
-    <p>Total Other Expenses: Rs. [[${#numbers.formatDecimal(totalOtherExpenses, 1, 2)}]]</p>
-    <p>Total Profit Amount: Rs. [[${#numbers.formatDecimal(totalProfitAmount, 1, 2)}]]</p>
     <p>Number of Orders: [[${totalOrders}]]</p>
 </div>
 </body>

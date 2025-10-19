@@ -2,6 +2,7 @@ package com.example.oil_mart.controller;
 
 import com.example.oil_mart.dto.request.SupplierItemSaveRequest;
 import com.example.oil_mart.dto.response.SupplierItemResponse;
+import com.example.oil_mart.dto.response.SupplierWithItemsResponse;
 import com.example.oil_mart.service.SupplierItemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,11 @@ public class SupplierItemController {
     @GetMapping("/supplier/{supplierId}")
     public ResponseEntity<List<SupplierItemResponse>> getBySupplier(@PathVariable Long supplierId) {
         return ResponseEntity.ok(supplierItemService.getBySupplier(supplierId));
+    }
+
+    @GetMapping("/supplier/{supplierId}/with-items")
+    public ResponseEntity<SupplierWithItemsResponse> getSupplierWithItems(@PathVariable Long supplierId) {
+        return ResponseEntity.ok(supplierItemService.getSupplierWithItems(supplierId));
     }
 
     @GetMapping("/item/{itemId}")

@@ -15,6 +15,9 @@ public class Sales_Order {
     @Column(name = "SALES_ORDER_NO", unique = true, nullable = false, length = 40)
     private String salesOrderNo;
 
+    @Column(name = "RECEIPT_NO",nullable = false, length = 40)
+    private String receiptNo;
+
     @Column(name = "SALES_ORDER_TYPE", nullable = false, length = 20)
     private String salesOrderType;
 

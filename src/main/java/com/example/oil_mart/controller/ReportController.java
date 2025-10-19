@@ -24,7 +24,7 @@ public class ReportController {
     // New endpoint for sales order report with date range
     @GetMapping("/sales-orders")
     public Map<String, String> getSalesOrderReport(
-            @RequestParam("expenses") Double expenses,
+            @RequestParam(value = "expenses", required = false, defaultValue = "0") Double expenses,
             @RequestParam("startDate") String startDate,
             @RequestParam("endDate") String endDate) throws Exception {
 
