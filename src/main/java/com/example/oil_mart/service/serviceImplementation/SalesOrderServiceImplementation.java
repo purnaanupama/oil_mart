@@ -1,8 +1,6 @@
 package com.example.oil_mart.service.serviceImplementation;
 
-import com.example.oil_mart.dto.request.SalesOrderItemUpdateRequest;
 import com.example.oil_mart.dto.request.SalesOrderSaveRequest;
-import com.example.oil_mart.dto.request.SalesOrderUpdateRequest;
 import com.example.oil_mart.dto.response.SalesOrderItemResponse;
 import com.example.oil_mart.dto.response.SalesOrderResponse;
 import com.example.oil_mart.model.*;
@@ -54,6 +52,7 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         salesOrder.setSalesOrderType(request.getSalesOrderType());
         salesOrder.setReceiptNo(request.getReceiptNo());
         salesOrder.setTotalAmount(request.getTotalAmount());
+        salesOrder.setReceiptNo(request.getReceiptNo());
 
         // Set customer only for CREDIT sales
         if ("CREDIT".equalsIgnoreCase(request.getSalesOrderType()) && request.getCustomerId() != null) {
@@ -68,7 +67,6 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         salesOrder.setNote(request.getNote());
         salesOrder = salesOrderRepository.save(salesOrder);
 
-        // 2️⃣ Process Sales Order Items
         double totalProfit = 0.0;
 
         if (request.getItems() != null && !request.getItems().isEmpty()) {
@@ -366,6 +364,7 @@ public class SalesOrderServiceImplementation implements SalesOrderService {
         response.setCreatedAt(salesOrder.getCreatedAt());
         response.setNote(salesOrder.getNote());
         response.setStatus(salesOrder.getStatus());
+        response.setReceiptNo(salesOrder.getReceiptNo());
 
         List<SalesOrderItemResponse> itemResponses = salesOrderItemRepository.findAllBySalesOrder(salesOrder)
                 .stream()

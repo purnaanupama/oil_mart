@@ -6,10 +6,11 @@ import lombok.Data;
 public class GRNItemResponse {
     private Long id;
     private Long itemId;
+    private Long supplierId;  // Added
     private String itemCode;
-    private int quantity;
-    private double unitPrice;
-    private double totalAmount;
+    private Integer quantity;
+    private Double unitPrice;
+    private Double totalAmount;
     private String supplierName;
     private String createdAt;
 }

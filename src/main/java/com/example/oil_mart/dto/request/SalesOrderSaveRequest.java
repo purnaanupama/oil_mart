@@ -7,6 +7,7 @@ import java.util.List;
 @Data
 public class SalesOrderSaveRequest {
     private String salesOrderNo;
+    private String receiptNo;
     private String salesOrderType;
     private String receiptNo;
     private Double totalAmount;

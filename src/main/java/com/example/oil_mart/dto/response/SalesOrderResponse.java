@@ -12,6 +12,7 @@ public class SalesOrderResponse {
     private Double totalAmount;
     private Long customerId;
     private String note;
+    private String receiptNo;
     private String createdAt;
     private Boolean status;
     private List<SalesOrderItemResponse> items;

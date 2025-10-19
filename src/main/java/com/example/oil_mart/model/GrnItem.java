@@ -16,6 +16,12 @@ public class GrnItem {
     @Column(name = "ITEM_ID", nullable = false)
     private Long itemId;
 
+    @Column(name = "ITEM_CODE", nullable = true)
+    private String itemCode;
+
+    @Column(name = "SUPPLIER_ID", nullable = false)
+    private Long supplierId;
+
     @Column(name = "QUANTITY", nullable = false)
     private Integer quantity;
 
@@ -25,7 +31,7 @@ public class GrnItem {
     @Column(name = "TOTAL_AMOUNT", nullable = false)
     private Double totalAmount;
 
-    @Column(name = "SUPPLIER_NAME", nullable = false)
+    @Column(name = "SUPPLIER_NAME", nullable = true)
     private String supplierName;
 
     @Column(name = "CREATED_AT", nullable = false)
