@@ -1,6 +1,7 @@
 package com.example.oil_mart.controller;
 
 import com.example.oil_mart.dto.request.ExpensesLogRequestDTO;
+import com.example.oil_mart.dto.request.ExpensesRequestDTO;
 import com.example.oil_mart.dto.response.ExpensesLogResponseDTO;
 import com.example.oil_mart.dto.response.ExpensesResponseDTO;
 import com.example.oil_mart.service.ExpensesService;
@@ -19,6 +20,12 @@ public class ExpenseController {
 
     private final ExpensesService expenseService;
 
+    @PostMapping
+    public ResponseEntity<ExpensesResponseDTO> createExpense(@Valid @RequestBody ExpensesRequestDTO requestDto) {
+        ExpensesResponseDTO response = expenseService.createExpense(requestDto);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
     @PostMapping("/logs")
     public ResponseEntity<ExpensesLogResponseDTO> addExpenseLog(@Valid @RequestBody ExpensesLogRequestDTO requestDto) {
         ExpensesLogResponseDTO response = expenseService.addExpenseLog(requestDto);
@@ -29,6 +36,12 @@ public class ExpenseController {
     public ResponseEntity<List<ExpensesResponseDTO>> getAllExpenses() {
         List<ExpensesResponseDTO> expenses = expenseService.getAllExpenses();
         return ResponseEntity.ok(expenses);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
+        expenseService.deleteExpense(id);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/logs/{id}")

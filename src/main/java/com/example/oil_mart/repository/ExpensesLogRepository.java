@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ExpensesLogRepository extends JpaRepository<ExpensesLog, Long> {
+    boolean existsByExpensesId(Long expenseId);
 }
